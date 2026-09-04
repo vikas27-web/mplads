@@ -30,22 +30,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: "4px",
-                background: "#EBF5FF",
-                color: "#0080FF",
-                border: "1px solid #B3D7FF",
-                letterSpacing: "0.02em",
-              }}
-            >
-              OFFICIAL SIH DATASET • AUDIT PROTOTYPE
-            </span>
-          </div>
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#0F1724", margin: 0, lineHeight: 1.2 }}>
             Audit Portfolio Dashboard
           </h1>
@@ -55,10 +39,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <Badge variant="success" size="md">
-            <ShieldCheck style={{ width: "13px", height: "13px", marginRight: "5px" }} />
-            Official SIH26102 Dataset
-          </Badge>
           {lastUpdatedText && (
             <span style={{ fontSize: "11px", color: "#6B7A8E", fontFamily: "JetBrains Mono, monospace" }}>
               {lastUpdatedText}

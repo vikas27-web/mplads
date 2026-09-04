@@ -187,20 +187,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse,
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: "11px", fontWeight: 600, color: "#3D4B5C" }}>SIH26102</span>
-            <span
-              style={{
-                fontSize: "9px",
-                fontWeight: 600,
-                padding: "2px 6px",
-                background: "#F0F7FF",
-                border: "1px solid #B3D7FF",
-                color: "#0052B3",
-                borderRadius: "3px",
-                letterSpacing: "0.02em",
-              }}
-            >
-              OFFICIAL SIH DATASET
-            </span>
           </div>
           <p style={{ fontSize: "10px", color: "#9BA8B5", lineHeight: 1.4, margin: 0 }}>
             AI Anomaly Detection — MPLAD Scheme

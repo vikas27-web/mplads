@@ -30,12 +30,7 @@ export const ProjectExplorerHeader: React.FC<ProjectExplorerHeaderProps> = ({ to
           Official parliamentary allocation catalog for 543 Lok Sabha Members of Parliament across 36 States/UTs with automated audit anomaly detection
         </p>
       </div>
-      <div style={{ flexShrink: 0 }}>
-        <Badge variant="success">
-          <ShieldCheck style={{ width: "13px", height: "13px", marginRight: "4px" }} />
-          Official SIH26102 Source
-        </Badge>
-      </div>
+
     </div>
   );
 };

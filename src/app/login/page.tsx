@@ -107,22 +107,6 @@ function LoginForm() {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span
-            style={{
-              fontSize: "11px",
-              fontWeight: 600,
-              padding: "4px 10px",
-              background: "#F0F7FF",
-              border: "1px solid #B3D7FF",
-              color: "#0052B3",
-              borderRadius: "4px",
-              letterSpacing: "0.02em",
-            }}
-          >
-            OFFICIAL SIH DATASET • AUDIT PROTOTYPE
-          </span>
-        </div>
       </header>
 
       {/* Main Login Form Container */}

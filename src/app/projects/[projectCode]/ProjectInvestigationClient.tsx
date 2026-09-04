@@ -179,24 +179,6 @@ export function ProjectInvestigationClient({ initialData }: ProjectInvestigation
               <span>Audit Queue</span>
             </Link>
           </div>
-
-          <span
-            style={{
-              fontSize: "11px",
-              fontWeight: 600,
-              padding: "2px 8px",
-              borderRadius: "4px",
-              background: "#F0F7FF",
-              color: "#0052B3",
-              border: "1px solid #B3D7FF",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <ShieldCheck style={{ width: "12px", height: "12px" }} />
-            OFFICIAL SIH DATASET • AUDIT PROTOTYPE
-          </span>
         </div>
 
         {/* 1. HEADER */}
@@ -220,9 +202,6 @@ export function ProjectInvestigationClient({ initialData }: ProjectInvestigation
                     {investigation.projectCode}
                   </span>
                   <SeverityBadge severity={investigation.severity} size="md" />
-                  <Badge variant="default" size="sm">
-                    Official SIH Dataset
-                  </Badge>
                 </div>
 
                 <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#0F1724", margin: 0, lineHeight: 1.25 }}>

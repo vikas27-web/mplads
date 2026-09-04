@@ -21,7 +21,6 @@ export default function AnalyticsPage() {
     <PageContainer
       title="Statistical Analytics"
       subtitle="Scheme-wide distributions, statistical allocation baselines, and anomaly signal detections"
-      badge={<Badge variant="info">Official SIH Dataset</Badge>}
     >
       {/* Responsible AI Notice */}
       <ResponsibleAiBanner />

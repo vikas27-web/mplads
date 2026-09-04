@@ -87,22 +87,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
 
       {/* Right: notices + auditor identity */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        {/* Official dataset notice */}
-        <span
-          className="hidden sm:inline-flex items-center gap-1"
-          style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            padding: "3px 9px",
-            background: "#F0F7FF",
-            border: "1px solid #B3D7FF",
-            color: "#0052B3",
-            borderRadius: "4px",
-            letterSpacing: "0.02em",
-          }}
-        >
-          OFFICIAL SIH DATASET • AUDIT PROTOTYPE
-        </span>
 
         {/* Responsible AI notice */}
         <span
