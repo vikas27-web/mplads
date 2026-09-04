@@ -178,10 +178,15 @@ export interface InvestigationItem {
   sector: string;
   severity: Severity;
   signalType: string;
+  signalSummary: string;
   explanation: string;
   evidenceCount: number;
   overallSignalScore: number;
   reviewPriority: string;
+  status: string;
+  createdDate: string;
+  lastUpdated: string;
+  assignedReviewer: string;
   signals: AnomalySignal[];
 }
 

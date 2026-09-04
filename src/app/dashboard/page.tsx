@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { DashboardData } from "@/types/dashboard";
 import { getDashboardData } from "@/lib/api/dashboardProvider";
+import { getInvestigations } from "@/lib/api-client";
+import type { InvestigationItem } from "../../../backend/api/types.ts";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardKpiGrid } from "@/components/dashboard/DashboardKpiGrid";
@@ -14,9 +16,11 @@ import { AgencyConcentrationSection } from "@/components/dashboard/AgencyConcent
 import { PrioritySignalsPanel } from "@/components/dashboard/PrioritySignalsPanel";
 import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTable";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
+import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +33,19 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getDashboardData();
-        if (response.success && response.data) {
-          setData(response.data);
+        const [dashRes, invRes] = await Promise.all([
+          getDashboardData(),
+          getInvestigations(),
+        ]);
+
+        if (dashRes.success && dashRes.data) {
+          setData(dashRes.data);
         } else {
-          setError(response.error?.message || "Failed to load dashboard data.");
+          setError(dashRes.error?.message || "Failed to load dashboard data.");
+        }
+
+        if (invRes.success && invRes.data) {
+          setInvestigations(invRes.data.investigations);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unexpected error occurred.");
@@ -110,17 +122,20 @@ export default function DashboardPage() {
         <AnomalyDistributionChart data={data.anomalyDistribution} />
       </div>
 
-      {/* 5. Priority Review Signals Panel */}
+      {/* 5. Recent Investigation & Audit Activity */}
+      <RecentInvestigationsSection investigations={investigations} />
+
+      {/* 6. Priority Review Signals Panel */}
       <PrioritySignalsPanel signals={data.prioritySignals} />
 
-      {/* 6. Signals Grid (District, Sector, Agency) */}
+      {/* 7. Signals Grid (District, Sector, Agency) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <DistrictRiskSection signals={data.districtSignals} />
         <SectorRiskSection sectors={data.sectorSignals} />
         <AgencyConcentrationSection agencies={data.agencySignals} />
       </div>
 
-      {/* 7. Priority Projects Table */}
+      {/* 8. Priority Projects Table */}
       <PriorityProjectsTable projects={filteredProjects} />
     </div>
   );

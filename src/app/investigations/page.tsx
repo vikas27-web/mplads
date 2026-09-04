@@ -210,12 +210,29 @@ export default function InvestigationsPage() {
                 <CardHeader style={{ paddingBottom: "10px" }}>
                   <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      <span
+                        style={{
+                          fontFamily: "JetBrains Mono, monospace",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: "#F0F3F7",
+                          color: "#3D4B5C",
+                          border: "1px solid #DDE2EA",
+                        }}
+                      >
+                        {item.id}
+                      </span>
                       <SeverityBadge severity={item.severity as any} />
                       <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "12px", fontWeight: 700, color: "#0080FF" }}>
                         {item.projectCode}
                       </span>
+                      <Badge variant="info" size="sm">
+                        {item.status}
+                      </Badge>
                       <Badge variant="outline" size="sm">
-                        {item.signalType.replace(/_/g, " ")}
+                        {item.signalSummary || item.signalType.replace(/_/g, " ")}
                       </Badge>
                     </div>
 
@@ -242,10 +259,11 @@ export default function InvestigationsPage() {
                     {item.title}
                   </CardTitle>
 
-                  <CardDescription style={{ fontSize: "11px", color: "#6B7A8E" }}>
-                    Constituency: <strong style={{ color: "#3D4B5C" }}>{item.constituency}</strong> | District:{" "}
-                    <strong style={{ color: "#3D4B5C" }}>{item.district}</strong> | Sector:{" "}
-                    <strong style={{ color: "#3D4B5C" }}>{item.sector}</strong>
+                  <CardDescription style={{ fontSize: "11px", color: "#6B7A8E", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+                    <span>Constituency: <strong style={{ color: "#3D4B5C" }}>{item.constituency}</strong></span>
+                    <span>District: <strong style={{ color: "#3D4B5C" }}>{item.district}</strong></span>
+                    <span>Sector: <strong style={{ color: "#3D4B5C" }}>{item.sector}</strong></span>
+                    <span>Assigned Reviewer: <strong style={{ color: "#0080FF" }}>{item.assignedReviewer}</strong></span>
                   </CardDescription>
                 </CardHeader>
 
@@ -275,12 +293,18 @@ export default function InvestigationsPage() {
                       color: "#6B7A8E",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+                      <span>
+                        Created: <strong style={{ color: "#0F1724", fontFamily: "JetBrains Mono, monospace" }}>{item.createdDate}</strong>
+                      </span>
+                      <span>
+                        Last Updated: <strong style={{ color: "#0F1724", fontFamily: "JetBrains Mono, monospace" }}>{item.lastUpdated}</strong>
+                      </span>
                       <span>
                         Evidence Items: <strong style={{ color: "#0F1724" }}>{item.evidenceCount}</strong>
                       </span>
                       <span>
-                        Anomaly Score:{" "}
+                        Signal Score:{" "}
                         <strong style={{ color: "#DE350B", fontFamily: "JetBrains Mono, monospace" }}>
                           {item.overallSignalScore.toFixed(3)}
                         </strong>

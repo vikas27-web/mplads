@@ -71,6 +71,21 @@ export function getInvestigations(options?: {
 
     const primarySignal = anomaly.signals[0];
     const totalEvidence = anomaly.signals.reduce((acc, s) => acc + s.evidence.length, 0);
+    const latestReview = repo.getLatestReviewStatus(p.project_code);
+    const reviewStatus =
+      latestReview ||
+      (anomaly.overallSeverity === "CRITICAL"
+        ? "Physical Verification Required"
+        : anomaly.overallSeverity === "HIGH"
+        ? "Flagged for Inspection"
+        : "Signal Acknowledged");
+
+    const assignedReviewer =
+      anomaly.overallSeverity === "CRITICAL"
+        ? "District Vigilance Inspection Cell"
+        : anomaly.overallSeverity === "HIGH"
+        ? "Nodal Audit Officer"
+        : "Desk Compliance Desk";
 
     items.push({
       id: `case-${p.project_code}`,
@@ -81,6 +96,7 @@ export function getInvestigations(options?: {
       sector: p.sector,
       severity: anomaly.overallSeverity,
       signalType: primarySignal.signalType,
+      signalSummary: `${primarySignal.signalType.replace(/_/g, " ")} (${anomaly.signals.length} ${anomaly.signals.length === 1 ? "signal" : "signals"})`,
       explanation: anomaly.explanation,
       evidenceCount: totalEvidence,
       overallSignalScore: anomaly.overallSignalScore,
@@ -90,6 +106,10 @@ export function getInvestigations(options?: {
           : anomaly.overallSeverity === "HIGH"
           ? "Field Audit Verification Scheduled"
           : "Desk Documentation Review",
+      status: reviewStatus,
+      createdDate: p.sanction_date || p.recommendation_date,
+      lastUpdated: p.actual_or_reported_completion_date || p.last_updated,
+      assignedReviewer,
       signals: anomaly.signals,
     });
   }
@@ -164,10 +184,15 @@ export function getInvestigationById(id: string): { investigation: Investigation
     sector: project.sector,
     severity: "LOW",
     signalType: "Standard Baseline",
+    signalSummary: "Standard Baseline (0 signals)",
     explanation: "Standard operational metrics within expected variance.",
     evidenceCount: 0,
     overallSignalScore: 0.0,
     reviewPriority: "Desk Documentation Review",
+    status: "Signal Acknowledged",
+    createdDate: project.sanction_date || project.recommendation_date,
+    lastUpdated: project.actual_or_reported_completion_date || project.last_updated,
+    assignedReviewer: "Desk Compliance Desk",
     signals: [],
   };
 
@@ -203,17 +228,27 @@ export function getProjectInvestigationDossier(projectCode: string): ProjectInve
     return {
       id: `sig-${idx + 1}-${s.signalType}`,
       signalName: s.signalType.replace(/_/g, " "),
+      signalType: s.signalType,
       category: s.detectorId,
+      detectorId: s.detectorId,
+      detectorVersion: s.detectorVersion,
+      severity: s.severity as any,
+      score: s.score,
       explanation: s.explanation,
       source: "Phase 8 Deterministic Anomaly Engine",
       observedValue: firstEv ? String(firstEv.observedValue) : "Flagged",
       referenceValue: firstEv ? String(firstEv.referenceValue) : undefined,
+      direction: firstEv?.direction,
+      affectedFeatures: s.affectedFeatures || [],
       evidenceStatus:
         s.severity === "CRITICAL" || s.severity === "HIGH"
           ? "Physical Inspection Recommended"
           : "Verification Required",
       verificationRequirement:
         firstEv?.explanation || "Cross-verify on-site measurement book and treasury voucher.",
+      generatedAt: s.generatedAt,
+      engineVersion: anomaly?.engineVersion || "1.0.0",
+      featureVersion: anomaly?.featureVersion || "1.0.0",
     };
   });
 
@@ -381,15 +416,34 @@ export function getProjectInvestigationDossier(projectCode: string): ProjectInve
     district: project.district,
     state: project.state,
     sector: project.sector,
+    workCategory: project.work_category,
     implementingAgency: project.implementing_agency,
     contractorName: project.contractor_name,
     sanctionedAmount: project.sanctioned_amount,
+    releasedAmount: project.released_amount,
     expenditureAmount: project.expenditure_amount,
+    physicalProgress: project.physical_progress,
+    projectStatus: project.status,
+    governanceStatus: project.verification_status,
+    documentationStatus: project.documentation_status,
     severity: severity as any,
+    overallSignalScore: anomaly?.overallSignalScore || 0,
+    reviewPriority:
+      severity === "CRITICAL"
+        ? "Immediate Physical Inspection Required"
+        : severity === "HIGH"
+        ? "Field Audit Verification Scheduled"
+        : "Desk Documentation Review",
     primarySignal,
     status: finalStatus as any,
+    recommendationDate: project.recommendation_date,
     sanctionDate: project.sanction_date,
+    startDate: project.start_date,
+    plannedCompletionDate: project.planned_completion_date,
+    actualCompletionDate: project.actual_or_reported_completion_date,
     lastUpdated: project.actual_or_reported_completion_date || project.last_updated,
+    engineVersion: anomaly?.engineVersion || "1.0.0",
+    featureVersion: anomaly?.featureVersion || "1.0.0",
     signals: uiSignals,
     financialEvidence,
     physicalVerificationEvidence,

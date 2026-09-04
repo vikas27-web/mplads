@@ -157,25 +157,59 @@ export const HumanVerificationPanel: React.FC<HumanVerificationPanelProps> = ({
             >
               Auditor Actions
             </span>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "8px" }}>
-              {/* Action 1: Mark for Physical Verification */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px" }}>
+              {/* Action 1: Mark as Under Human Review */}
               <Button
-                variant="primary"
+                variant={currentStatus === "Under Human Review" ? "secondary" : "primary"}
                 size="sm"
                 onClick={() =>
                   handleSimpleAction(
-                    "MARK_PHYSICAL_VERIFICATION",
-                    "Physical Verification Required",
-                    "Mark for Physical Verification",
-                    "Project marked for priority physical inspection."
+                    "MARK_UNDER_HUMAN_REVIEW",
+                    "Under Human Review",
+                    "Mark as Under Human Review",
+                    "Case assigned to active desk review queue."
                   )
                 }
                 leftIcon={<ClipboardCheck style={{ width: "13px", height: "13px" }} />}
               >
-                Physical Verification
+                Under Human Review
               </Button>
 
-              {/* Action 2: Schedule Inspection */}
+              {/* Action 2: Inspection Recommended */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleSimpleAction(
+                    "RECOMMEND_INSPECTION",
+                    "Inspection Recommended",
+                    "Inspection Recommended",
+                    "Field inspection recommended to district vigilance authorities."
+                  )
+                }
+                leftIcon={<AlertTriangle style={{ width: "13px", height: "13px", color: "#B76E00" }} />}
+              >
+                Inspection Recommended
+              </Button>
+
+              {/* Action 3: Evidence Reviewed */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleSimpleAction(
+                    "MARK_EVIDENCE_REVIEWED",
+                    "Evidence Reviewed",
+                    "Evidence Reviewed",
+                    "Treasury vouchers and measurement books examined by auditor."
+                  )
+                }
+                leftIcon={<CheckCircle2 style={{ width: "13px", height: "13px", color: "#00875A" }} />}
+              >
+                Evidence Reviewed
+              </Button>
+
+              {/* Action 4: Schedule Inspection */}
               <Button
                 variant="outline"
                 size="sm"
@@ -192,7 +226,7 @@ export const HumanVerificationPanel: React.FC<HumanVerificationPanelProps> = ({
                 Schedule Inspection
               </Button>
 
-              {/* Action 3: Request Additional Evidence */}
+              {/* Action 5: Request Additional Evidence */}
               <Button
                 variant="outline"
                 size="sm"
@@ -209,24 +243,24 @@ export const HumanVerificationPanel: React.FC<HumanVerificationPanelProps> = ({
                 Request Evidence
               </Button>
 
-              {/* Action 4: Acknowledge Signal */}
+              {/* Action 6: Close Review */}
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() =>
                   handleSimpleAction(
-                    "ACKNOWLEDGE_SIGNAL",
-                    "Signal Acknowledged",
-                    "Acknowledge Signal",
-                    "Signal acknowledged by auditor."
+                    "CLOSE_REVIEW",
+                    "Review Closed",
+                    "Close Review",
+                    "Audit review marked as concluded based on current evidence."
                   )
                 }
-                leftIcon={<CheckCircle2 style={{ width: "13px", height: "13px", color: "#00875A" }} />}
+                leftIcon={<CheckCircle2 style={{ width: "13px", height: "13px", color: "#4A5568" }} />}
               >
-                Acknowledge Signal
+                Close Review
               </Button>
 
-              {/* Action 5: Dismiss Signal (Requires Modal Confirmation) */}
+              {/* Action 7: Dismiss Signal (Requires Modal Confirmation) */}
               <Button
                 variant="ghost"
                 size="sm"

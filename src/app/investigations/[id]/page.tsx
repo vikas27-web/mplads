@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { getProjectInvestigation } from "@/lib/api/projectInvestigationProvider";
-import { getInvestigations } from "@/lib/api-client";
+import { getInvestigationById } from "../../../../backend/api/services/investigationService.ts";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { EmptyState } from "@/components/ui/States";
 import { Button } from "@/components/ui/Button";
@@ -15,30 +14,33 @@ interface InvestigationDetailPageProps {
 }
 
 export default async function InvestigationDetailPage({ params }: InvestigationDetailPageProps) {
-  let targetCode = params.id;
+  const resolvedParams = await params;
+  const targetId = resolvedParams?.id;
 
-  // Handle case prefix
-  if (targetCode.startsWith("case-")) {
-    targetCode = targetCode.replace("case-", "");
-  } else if (/^\d+$/.test(targetCode)) {
-    // Numeric index lookup from prioritized investigations
-    const allInvRes = await getInvestigations();
-    const idx = parseInt(targetCode, 10) - 1;
-    if (allInvRes.success && allInvRes.data && idx >= 0 && idx < allInvRes.data.investigations.length) {
-      targetCode = allInvRes.data.investigations[idx].projectCode;
-    }
+  if (!targetId) {
+    return (
+      <PageContainer title="Investigation Dossier" subtitle="Audit Case Review">
+        <div className="py-12">
+          <EmptyState
+            icon={<FileX className="w-8 h-8 text-amber-400" />}
+            title="Case Identifier Required"
+            description="No valid investigation case ID was specified."
+          />
+        </div>
+      </PageContainer>
+    );
   }
 
-  const res = await getProjectInvestigation(targetCode);
+  const result = getInvestigationById(targetId);
 
-  if (!res.success || !res.data) {
+  if (!result || !result.dossier) {
     return (
       <PageContainer title="Investigation Dossier" subtitle="Audit Case Review">
         <div className="py-12">
           <EmptyState
             icon={<FileX className="w-8 h-8 text-amber-400" />}
             title="Investigation Case Dossier Not Found"
-            description={`No audit investigation dossier exists for case identifier "${params.id}".`}
+            description={`No audit investigation dossier exists for case identifier "${targetId}".`}
           />
           <div className="flex justify-center mt-4">
             <Link href="/investigations">
@@ -53,5 +55,5 @@ export default async function InvestigationDetailPage({ params }: InvestigationD
     );
   }
 
-  return <ProjectInvestigationClient initialData={res.data} />;
+  return <ProjectInvestigationClient initialData={result.dossier} />;
 }

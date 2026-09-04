@@ -197,3 +197,15 @@ export async function saveProjectAuditorReview(
   });
 }
 
+export async function getProjectAuditorReviews(
+  projectCode: string
+): Promise<ApiResponse<any[]>> {
+  return apiFetch<any[]>(`/api/projects/${encodeURIComponent(projectCode)}/reviews`);
+}
+
+export async function getProjectAuditorNotes(
+  projectCode: string
+): Promise<ApiResponse<any[]>> {
+  return apiFetch<any[]>(`/api/projects/${encodeURIComponent(projectCode)}/notes`);
+}
+

@@ -4,7 +4,7 @@ import React from "react";
 import { AnomalySignal } from "@/types/project-investigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { AlertCircle, FileSearch, ShieldCheck, Eye } from "lucide-react";
+import { AlertCircle, FileSearch, ShieldCheck, Eye, Activity, Cpu, Layers } from "lucide-react";
 
 interface InvestigationSignalPanelProps {
   signals: AnomalySignal[];
@@ -32,10 +32,10 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
             </div>
             <div>
               <CardTitle style={{ fontSize: "15px", fontWeight: 700, color: "#0F1724" }}>
-                Why This Was Flagged — Anomaly Signals
+                Why This Was Flagged — Anomaly Signals & Mathematical Evidence
               </CardTitle>
               <p style={{ fontSize: "11px", color: "#6B7A8E", margin: "2px 0 0" }}>
-                Key indicators and observed discrepancies identified for human verification
+                Explainable anomaly signals, observed thresholds, and affected features identified for physical verification
               </p>
             </div>
           </div>
@@ -45,12 +45,12 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
         </div>
       </CardHeader>
 
-      <CardContent style={{ paddingTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+      <CardContent style={{ paddingTop: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
         {signals.map((signal, index) => (
           <div
             key={signal.id || index}
             style={{
-              padding: "14px",
+              padding: "16px",
               borderRadius: "8px",
               background: "#FFFFFF",
               border: "1px solid #DDE2EA",
@@ -59,7 +59,7 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
               gap: "12px",
             }}
           >
-            {/* Header: Signal Name & Category */}
+            {/* Header: Signal Name, Score & Badges */}
             <div
               style={{
                 display: "flex",
@@ -71,7 +71,7 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                 paddingBottom: "10px",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                 <span
                   style={{
                     fontSize: "11px",
@@ -89,10 +89,41 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                 <h4 style={{ fontSize: "13px", fontWeight: 700, color: "#0F1724", margin: 0 }}>
                   {signal.signalName}
                 </h4>
+                {signal.signalType && (
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontFamily: "JetBrains Mono, monospace",
+                      color: "#6B7A8E",
+                      background: "#F8F9FB",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      border: "1px solid #E2E8F0",
+                    }}
+                  >
+                    {signal.signalType}
+                  </span>
+                )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                {signal.score !== undefined && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontFamily: "JetBrains Mono, monospace",
+                      fontWeight: 700,
+                      color: "#DE350B",
+                      background: "#FFEBE6",
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      border: "1px solid #FFBDAD",
+                    }}
+                  >
+                    Score: {signal.score.toFixed(3)}
+                  </span>
+                )}
                 <Badge variant="outline" size="sm">
-                  {signal.category}
+                  {signal.detectorId || signal.category}
                 </Badge>
                 <Badge
                   variant={
@@ -130,7 +161,7 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                   color: "#3D4B5C",
                   lineHeight: 1.55,
                   background: "#F8F9FB",
-                  padding: "8px 10px",
+                  padding: "10px 12px",
                   borderRadius: "6px",
                   border: "1px solid #DDE2EA",
                   margin: 0,
@@ -140,8 +171,8 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
               </p>
             </div>
 
-            {/* Side-by-Side: Observed vs Reference Values */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
+            {/* Side-by-Side: Observed vs Reference Values & Direction */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
               <div
                 style={{
                   padding: "10px 12px",
@@ -195,7 +226,7 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                     color: "#6B7A8E",
                   }}
                 >
-                  Reference / Expected Baseline
+                  Reference / Baseline
                 </span>
                 <p
                   style={{
@@ -208,7 +239,71 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                   {signal.referenceValue || "Standard statutory audit baseline"}
                 </p>
               </div>
+
+              {signal.direction && (
+                <div
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: "6px",
+                    background: "#F8F9FB",
+                    border: "1px solid #DDE2EA",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color: "#6B7A8E",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <Activity style={{ width: "12px", height: "12px", color: "#0080FF" }} />
+                    Deviation Direction
+                  </span>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontFamily: "JetBrains Mono, monospace",
+                      color: "#0080FF",
+                      fontWeight: 600,
+                      margin: "4px 0 0",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {signal.direction.replace(/_/g, " ")}
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/* Affected Features List */}
+            {signal.affectedFeatures && signal.affectedFeatures.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7A8E" }}>
+                  Affected Features:
+                </span>
+                {signal.affectedFeatures.map((feat) => (
+                  <span
+                    key={feat}
+                    style={{
+                      fontSize: "10px",
+                      fontFamily: "JetBrains Mono, monospace",
+                      color: "#3D4B5C",
+                      background: "#F0F3F7",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      border: "1px solid #DDE2EA",
+                    }}
+                  >
+                    {feat}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Verification Requirement & Evidence Source */}
             <div
@@ -230,22 +325,29 @@ export const InvestigationSignalPanel: React.FC<InvestigationSignalPanelProps> =
                   <span>{signal.verificationRequirement}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#6B7A8E" }}>
-                <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Source:</span>
-                <span
-                  style={{
-                    fontFamily: "JetBrains Mono, monospace",
-                    color: "#3D4B5C",
-                    fontWeight: 600,
-                    background: "#F0F3F7",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    border: "1px solid #DDE2EA",
-                    fontSize: "10px",
-                  }}
-                >
-                  {signal.source}
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#6B7A8E", flexWrap: "wrap" }}>
+                {signal.generatedAt && (
+                  <span style={{ fontSize: "10px", fontFamily: "JetBrains Mono, monospace" }}>
+                    Generated: {signal.generatedAt.split("T")[0]}
+                  </span>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Engine:</span>
+                  <span
+                    style={{
+                      fontFamily: "JetBrains Mono, monospace",
+                      color: "#3D4B5C",
+                      fontWeight: 600,
+                      background: "#F0F3F7",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      border: "1px solid #DDE2EA",
+                      fontSize: "10px",
+                    }}
+                  >
+                    v{signal.engineVersion || "1.0.0"} (F:v{signal.featureVersion || "1.0.0"})
+                  </span>
+                </div>
               </div>
             </div>
           </div>

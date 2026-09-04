@@ -1,28 +1,51 @@
 import { SeverityLevel } from "@/components/ui/SeverityBadge";
 
 /**
- * MPLAD SENTINEL — Phase 5 Data Contracts
+ * MPLAD SENTINEL — Phase 10 Data Contracts
  * Investigation & Explainability Workspace
  */
 
 export type AuditWorkflowStatus =
   | "Flagged for Inspection"
+  | "Under Human Review"
   | "Physical Verification Required"
+  | "Inspection Recommended"
   | "Inspection Scheduled"
+  | "Evidence Reviewed"
   | "Additional Evidence Requested"
   | "Signal Acknowledged"
+  | "Review Closed"
   | "Signal Dismissed";
+
+export interface AnomalyEvidenceItem {
+  feature: string;
+  observedValue: string | number | null;
+  referenceValue: string | number;
+  direction: string;
+  explanation: string;
+}
 
 export interface AnomalySignal {
   id: string;
   signalName: string;
+  signalType?: string;
   category: string;
+  detectorId?: string;
+  detectorVersion?: string;
+  severity?: SeverityLevel;
+  score?: number;
   explanation: string;
-  source: string; // e.g., "Demo Anomaly Signal", "Synthetic Geo-location Record", "Demo Financial Record"
+  source: string; // e.g., "Phase 8 Deterministic Anomaly Engine"
   observedValue: string;
-  referenceValue?: string; // Reference / expected value
+  referenceValue?: string; // Reference / expected baseline
+  direction?: string;
+  affectedFeatures?: string[];
+  evidenceList?: AnomalyEvidenceItem[];
   evidenceStatus: "Flagged" | "Verification Required" | "Under Review" | "Physical Inspection Recommended";
   verificationRequirement: string;
+  generatedAt?: string;
+  engineVersion?: string;
+  featureVersion?: string;
 }
 
 export interface PaymentReferenceRecord {
@@ -31,7 +54,7 @@ export interface PaymentReferenceRecord {
   referenceNumber: string;
   amount: number;
   description: string;
-  source: string; // e.g., "Demo Financial Record"
+  source: string; // e.g., "Canonical Treasury Ledger (SQLite API)"
   status: string; // e.g., "Disbursed", "Pending Clearance"
 }
 
@@ -40,7 +63,7 @@ export interface FinancialEvidence {
   expenditureAmount: number;
   paymentRecords: PaymentReferenceRecord[];
   evidenceStatus: string;
-  source: string; // e.g., "Demo Financial Record"
+  source: string; // e.g., "SQLite Payment Ledger API"
 }
 
 export interface PhysicalVerificationLog {
@@ -51,16 +74,16 @@ export interface PhysicalVerificationLog {
   notes: string;
   photoUrl?: string;
   geoCoordinates?: string;
-  source: string; // e.g., "Synthetic Inspection Record", "Synthetic Geo-location Record"
+  source: string; // e.g., "Canonical Physical Progress Events (SQLite API)"
 }
 
 export interface PhysicalVerificationEvidence {
-  reportedCompletionState: string; // Provided as-is: e.g., "Stage 2 Foundation Completed"
-  inspectionState: string; // Provided: e.g., "Field Verification Pending"
-  geoLocationRecordState: string; // Provided: e.g., "12.9250° N, 77.5938° E (Geofence Alert: 42m to BBMP Asset)"
-  photoDocumentAvailability: string; // Provided: e.g., "1 Site Photo Available (Awaiting Stage 2 Photo)"
+  reportedCompletionState: string; // Provided as-is: e.g., "Reported 75% Physical Completion (Roof Slab)"
+  inspectionState: string; // Provided: e.g., "3 Verified Field Inspection Logs on Record"
+  geoLocationRecordState: string; // Provided: e.g., "12.9250° N, 77.5938° E (Constituency: Bangalore South)"
+  photoDocumentAvailability: string; // Provided: e.g., "Site Geotagged Photographs Available"
   verificationLogs: PhysicalVerificationLog[];
-  source: string; // e.g., "Synthetic Inspection Record"
+  source: string; // e.g., "SQLite Physical Progress Store"
 }
 
 export interface DocumentEvidenceItem {
@@ -69,7 +92,7 @@ export interface DocumentEvidenceItem {
   documentType: string;
   availability: "Available" | "Missing" | "Pending Submission" | "Under Review";
   verificationStatus: "Unverified" | "Verified by Auditor" | "Discrepancy Found" | "Pending Field Check";
-  source: string; // e.g., "Demo Document Record"
+  source: string; // e.g., "Canonical Statutory Documents (SQLite API)"
 }
 
 export interface TimelineEvent {
@@ -78,7 +101,7 @@ export interface TimelineEvent {
   title: string;
   description: string;
   actor: string;
-  source: string; // e.g., "Demo Audit History", "Demo Anomaly Signal"
+  source: string;
   type:
     | "project_registered"
     | "admin_approval"
@@ -102,14 +125,18 @@ export interface AuditTrailEntry {
   actor: string;
   actionType: string;
   notes: string;
-  isSessionAction: boolean; // Distinguishes "Demo Session Action" from source evidence
+  isSessionAction: boolean;
 }
 
 export type HumanAuditActionType =
+  | "MARK_UNDER_HUMAN_REVIEW"
   | "MARK_PHYSICAL_VERIFICATION"
+  | "RECOMMEND_INSPECTION"
   | "SCHEDULE_INSPECTION"
+  | "MARK_EVIDENCE_REVIEWED"
   | "REQUEST_ADDITIONAL_EVIDENCE"
   | "ACKNOWLEDGE_SIGNAL"
+  | "CLOSE_REVIEW"
   | "DISMISS_SIGNAL";
 
 export interface ProjectInvestigation {
@@ -121,15 +148,29 @@ export interface ProjectInvestigation {
   district: string;
   state: string;
   sector: string;
+  workCategory?: string;
   implementingAgency: string;
   contractorName?: string;
   sanctionedAmount: number;
+  releasedAmount?: number;
   expenditureAmount: number;
+  physicalProgress?: number;
+  projectStatus?: string;
+  governanceStatus?: string;
+  documentationStatus?: string;
   severity: SeverityLevel;
+  overallSignalScore?: number;
+  reviewPriority?: string;
   primarySignal: string;
   status: AuditWorkflowStatus | string;
+  recommendationDate?: string;
   sanctionDate: string;
+  startDate?: string;
+  plannedCompletionDate?: string;
+  actualCompletionDate?: string | null;
   lastUpdated: string;
+  engineVersion?: string;
+  featureVersion?: string;
   signals: AnomalySignal[];
   financialEvidence: FinancialEvidence;
   physicalVerificationEvidence: PhysicalVerificationEvidence;
