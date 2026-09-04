@@ -9,11 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
 import { ResponsibleAiBanner } from "@/components/ui/ResponsibleAiBanner";
 import { getInvestigations } from "@/lib/api-client";
-import { getDashboardData } from "@/lib/api/dashboardProvider";
 import type { InvestigationItem } from "../../../backend/api/types.ts";
-import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTable";
 import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
-import { PriorityProject } from "@/types/dashboard";
 import {
   FileSearch,
   ArrowRight,
@@ -24,7 +21,6 @@ import {
   FilePlus,
   CheckCircle2,
   ListFilter,
-  Table as TableIcon,
   History,
 } from "lucide-react";
 
@@ -38,8 +34,7 @@ function extractMpName(title: string): string {
 
 export default function InvestigationsPage() {
   const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
-  const [priorityProjects, setPriorityProjects] = useState<PriorityProject[]>([]);
-  const [activeTab, setActiveTab] = useState<"queue" | "table" | "activity">("queue");
+  const [activeTab, setActiveTab] = useState<"queue" | "activity">("queue");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState("ALL");
@@ -50,19 +45,12 @@ export default function InvestigationsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const [invRes, dashRes] = await Promise.all([
-        getInvestigations(),
-        getDashboardData(),
-      ]);
+      const invRes = await getInvestigations();
 
       if (invRes.success && invRes.data) {
         setInvestigations(invRes.data.investigations);
       } else {
         setError(invRes.error?.message || "Failed to retrieve investigation cases.");
-      }
-
-      if (dashRes.success && dashRes.data) {
-        setPriorityProjects(dashRes.data.priorityProjects || []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected network error occurred.");
@@ -96,22 +84,10 @@ export default function InvestigationsPage() {
     });
   }, [investigations, severityFilter, searchQuery]);
 
-  const filteredTableProjects = useMemo(() => {
-    return priorityProjects.filter((p) => {
-      const matchesSeverity =
-        severityFilter === "ALL" || p.severity === severityFilter;
-      const matchesSearch =
-        searchQuery === "" ||
-        p.projectCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.constituency.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSeverity && matchesSearch;
-    });
-  }, [priorityProjects, severityFilter, searchQuery]);
-
   return (
     <PageContainer
-      title="Audit Investigation Queue"
-      subtitle="Potential anomaly signals prioritized for human review."
+      title="Audit Investigations"
+      subtitle="Human auditor review workflow — review status, auditor notes, and evidence verification."
       badge={
         <span
           style={{
@@ -188,28 +164,7 @@ export default function InvestigationsPage() {
             }}
           >
             <ListFilter style={{ width: "13px", height: "13px" }} />
-            Active Review Cards ({investigations.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab("table")}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "6px 14px",
-              fontSize: "12px",
-              fontWeight: 600,
-              borderRadius: "6px",
-              border: activeTab === "table" ? "1px solid #0080FF" : "1px solid #DDE2EA",
-              background: activeTab === "table" ? "#0080FF" : "#FFFFFF",
-              color: activeTab === "table" ? "#FFFFFF" : "#4A5568",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <TableIcon style={{ width: "13px", height: "13px" }} />
-            Inspection Queue Table ({priorityProjects.length})
+            Active Review Cases ({investigations.length})
           </button>
 
           <button
@@ -230,16 +185,11 @@ export default function InvestigationsPage() {
             }}
           >
             <History style={{ width: "13px", height: "13px" }} />
-            Recent Audit Trail
+            Recent Audit Activity
           </button>
         </div>
 
-        {/* Tab 2: Inspection Table */}
-        {activeTab === "table" && (
-          <PriorityProjectsTable projects={filteredTableProjects} />
-        )}
-
-        {/* Tab 3: Recent Activity */}
+        {/* Tab 2: Recent Activity */}
         {activeTab === "activity" && (
           <RecentInvestigationsSection investigations={investigations} />
         )}

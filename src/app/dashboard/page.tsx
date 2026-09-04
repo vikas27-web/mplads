@@ -7,8 +7,7 @@ import { getDashboardData } from "@/lib/api/dashboardProvider";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardKpiGrid } from "@/components/dashboard/DashboardKpiGrid";
-import { RiskDistributionChart } from "@/components/dashboard/RiskDistributionChart";
-import { AnomalyDistributionChart } from "@/components/dashboard/AnomalyDistributionChart";
+import { ExecutivePortfolioSummary } from "@/components/dashboard/ExecutivePortfolioSummary";
 import { DataProvenanceCard } from "@/components/ui/DataProvenanceCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import {
@@ -82,44 +81,44 @@ export default function DashboardPage() {
 
   const workspacePortals = [
     {
-      title: "Priority Audit Signals",
+      title: "Audit Signals",
       subtitle: `${data.prioritySignals.length} Critical & High anomalies flagged for inspection`,
       href: "/signals",
       icon: <AlertTriangle style={{ width: "18px", height: "18px", color: "#C0392B" }} />,
       tag: `${data.prioritySignals.length} Signals`,
       accent: "#FEF2F2",
       badgeColor: "#991B1B",
-      actionText: "Open Signals View",
+      actionText: "View all signals",
     },
     {
-      title: "Audit Investigation Queue",
-      subtitle: `${data.kpis.totalAnomalies} Priority review cases with human-in-the-loop workflow`,
+      title: "Investigations",
+      subtitle: `${data.kpis.totalAnomalies} Priority review cases with human auditor workflow`,
       href: "/investigations",
       icon: <ClipboardList style={{ width: "18px", height: "18px", color: "#0080FF" }} />,
-      tag: `${data.kpis.totalAnomalies} Queued Cases`,
+      tag: `${data.kpis.totalAnomalies} Cases`,
       accent: "#EBF5FF",
       badgeColor: "#0052B3",
-      actionText: "Open Investigation Queue",
+      actionText: "View investigations",
     },
     {
-      title: "Parliamentary Allocation Explorer",
+      title: "Project Explorer",
       subtitle: "Catalog of 543 Lok Sabha MPs with allocation limits across 36 States/UTs",
       href: "/projects",
       icon: <FolderSearch style={{ width: "18px", height: "18px", color: "#276749" }} />,
       tag: "543 MP Records",
       accent: "#F0FFF4",
       badgeColor: "#166534",
-      actionText: "Explore 543 MPs",
+      actionText: "Open Project Explorer",
     },
     {
-      title: "Regional & Sector Analytics",
-      subtitle: "Geographic distribution, sector anomaly rates, and agency concentrations",
+      title: "Analytics",
+      subtitle: "State-wise distributions, sector anomaly rates, and agency concentrations",
       href: "/analytics",
       icon: <BarChart3 style={{ width: "18px", height: "18px", color: "#6366F1" }} />,
       tag: "36 States / UTs",
       accent: "#EEF2FF",
       badgeColor: "#4338CA",
-      actionText: "View Regional Analytics",
+      actionText: "Open analytics",
     },
   ];
 
@@ -138,17 +137,11 @@ export default function DashboardPage() {
       {/* 3. Primary Official KPIs */}
       <DashboardKpiGrid kpis={data.kpis} />
 
-      {/* 4. Portfolio Risk Distribution Charts */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        <RiskDistributionChart data={data.riskDistribution} />
-        <AnomalyDistributionChart data={data.anomalyDistribution} />
-      </div>
+      {/* 4. Compact Executive Portfolio Summary */}
+      <ExecutivePortfolioSummary
+        riskData={data.riskDistribution}
+        totalRecords={data.kpis.totalProjects}
+      />
 
       {/* 5. Clean Institutional Workspace Gateway (Replaces clumsy stacked lists) */}
       <Card variant="default">
