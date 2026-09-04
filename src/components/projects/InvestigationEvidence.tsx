@@ -124,50 +124,59 @@ export const InvestigationEvidence: React.FC<InvestigationEvidenceProps> = ({
                 <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7A8E" }}>
                   Disbursement Tranches
                 </span>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "200px", overflowY: "auto" }}>
-                  {financialEvidence.paymentRecords.map((pay) => (
-                    <div
-                      key={pay.id}
-                      style={{
-                        padding: "8px 10px",
-                        borderRadius: "6px",
-                        background: "#FFFFFF",
-                        border: "1px solid #DDE2EA",
-                        fontSize: "11px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "4px",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#0080FF", fontSize: "11px", fontWeight: 600 }}>
-                          {pay.referenceNumber}
-                        </span>
-                        <span style={{ fontWeight: 700, color: "#0F1724" }}>{formatCurrency(pay.amount)}</span>
-                      </div>
-                      <p style={{ fontSize: "11px", color: "#6B7A8E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {pay.description}
-                      </p>
+                {financialEvidence.paymentRecords.length > 0 ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "200px", overflowY: "auto" }}>
+                    {financialEvidence.paymentRecords.map((pay) => (
                       <div
+                        key={pay.id}
                         style={{
+                          padding: "8px 10px",
+                          borderRadius: "6px",
+                          background: "#FFFFFF",
+                          border: "1px solid #DDE2EA",
+                          fontSize: "11px",
                           display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          fontSize: "10px",
-                          color: "#6B7A8E",
-                          borderTop: "1px solid #F0F3F7",
-                          paddingTop: "4px",
+                          flexDirection: "column",
+                          gap: "4px",
                         }}
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <Clock style={{ width: "11px", height: "11px" }} />
-                          {formatDate(pay.date)}
-                        </span>
-                        <span style={{ color: "#B76E00", fontWeight: 600 }}>{pay.status}</span>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#0080FF", fontSize: "11px", fontWeight: 600 }}>
+                            {pay.referenceNumber}
+                          </span>
+                          <span style={{ fontWeight: 700, color: "#0F1724" }}>{formatCurrency(pay.amount)}</span>
+                        </div>
+                        <p style={{ fontSize: "11px", color: "#6B7A8E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {pay.description}
+                        </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            fontSize: "10px",
+                            color: "#6B7A8E",
+                            borderTop: "1px solid #F0F3F7",
+                            paddingTop: "4px",
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <Clock style={{ width: "11px", height: "11px" }} />
+                            {formatDate(pay.date)}
+                          </span>
+                          <span style={{ color: "#B76E00", fontWeight: 600 }}>{pay.status}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: "14px 12px", borderRadius: "6px", background: "#F8F9FB", border: "1px dashed #DDE2EA", fontSize: "11px", color: "#6B7A8E", textAlign: "center" }}>
+                    <strong style={{ color: "#3D4B5C" }}>Not available in source dataset</strong>
+                    <p style={{ fontSize: "10px", margin: "4px 0 0", color: "#8C9BAE" }}>
+                      Official SIH26102 dataset provides parliamentary allocation limits without itemized payment tranches.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -309,7 +318,7 @@ export const InvestigationEvidence: React.FC<InvestigationEvidenceProps> = ({
               </div>
 
               {/* Inspection Logs snippet */}
-              {physicalVerificationEvidence.verificationLogs.length > 0 && (
+              {physicalVerificationEvidence.verificationLogs.length > 0 ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7A8E" }}>
                     Field Inspection Logs ({physicalVerificationEvidence.verificationLogs.length})
@@ -337,6 +346,13 @@ export const InvestigationEvidence: React.FC<InvestigationEvidenceProps> = ({
                       </div>
                     ))}
                   </div>
+                </div>
+              ) : (
+                <div style={{ padding: "12px", borderRadius: "6px", background: "#F8F9FB", border: "1px dashed #DDE2EA", fontSize: "11px", color: "#6B7A8E", textAlign: "center" }}>
+                  <strong style={{ color: "#3D4B5C" }}>Not available in source dataset</strong>
+                  <p style={{ fontSize: "10px", margin: "4px 0 0", color: "#8C9BAE" }}>
+                    Official dataset specifies parliamentary allocations without geo-tagged inspection logs.
+                  </p>
                 </div>
               )}
             </div>
@@ -390,14 +406,15 @@ export const InvestigationEvidence: React.FC<InvestigationEvidenceProps> = ({
                   border: "1px solid #DDE2EA",
                 }}
               >
-                Demo Document Record
+                {documentEvidence.length > 0 ? "Statutory Documents" : "Official Source Registry"}
               </span>
             </div>
           </CardHeader>
 
           <CardContent style={{ paddingTop: "14px", display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, gap: "14px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "300px", overflowY: "auto" }}>
-              {documentEvidence.map((doc) => (
+              {documentEvidence.length > 0 ? (
+                documentEvidence.map((doc) => (
                 <div
                   key={doc.id}
                   style={{
@@ -460,7 +477,15 @@ export const InvestigationEvidence: React.FC<InvestigationEvidenceProps> = ({
                     </span>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <div style={{ padding: "14px 12px", borderRadius: "6px", background: "#F8F9FB", border: "1px dashed #DDE2EA", fontSize: "11px", color: "#6B7A8E", textAlign: "center" }}>
+                  <strong style={{ color: "#3D4B5C" }}>Not available in source dataset</strong>
+                  <p style={{ fontSize: "10px", margin: "4px 0 0", color: "#8C9BAE" }}>
+                    Official SIH26102 dataset provides parliamentary allocation limits without statutory document attachments.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div

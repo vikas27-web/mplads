@@ -253,6 +253,8 @@ export function getProjectInvestigationDossier(projectCode: string): ProjectInve
   });
 
   // Map Financial Evidence
+  const isOfficial = (project as any).is_official === 1;
+
   const financialEvidence: FinancialEvidence = {
     sanctionedAmount: project.sanctioned_amount,
     expenditureAmount: project.expenditure_amount,
@@ -265,71 +267,95 @@ export function getProjectInvestigationDossier(projectCode: string): ProjectInve
       source: "Canonical Treasury Ledger (SQLite)",
       status: p.status,
     })),
-    evidenceStatus:
-      payments.some((p) => p.status === "Pending Clearance")
-        ? "Pending Clearance Detected"
-        : "Reconciled with Treasury Ledger",
-    source: "SQLite Payment Ledger",
+    evidenceStatus: isOfficial
+      ? "Official Parliamentary Allocation Limit — Source contains allocation ceiling. Itemized transaction vouchers not available in source dataset."
+      : payments.some((p) => p.status === "Pending Clearance")
+      ? "Pending Clearance Detected"
+      : "Reconciled with Treasury Ledger",
+    source: isOfficial ? "Official SIH26102 Allocation Ledger" : "SQLite Payment Ledger",
   };
 
   // Map Physical Verification Logs
   const latestProgress = progressLogs[progressLogs.length - 1];
   const physicalVerificationEvidence: PhysicalVerificationEvidence = {
-    reportedCompletionState: latestProgress
+    reportedCompletionState: isOfficial
+      ? "Not available in source dataset"
+      : latestProgress
       ? `Reported ${latestProgress.progress_percentage}% Physical Completion (${latestProgress.stage_name})`
       : `Reported ${project.physical_progress}% Physical Progress`,
-    inspectionState:
-      progressLogs.length > 0
-        ? `${progressLogs.length} Verified Field Inspection Logs on Record`
-        : "Initial Milestone - Ground Verification Pending",
-    geoLocationRecordState: `${project.latitude ? project.latitude.toFixed(4) : "12.9716"}° N, ${project.longitude ? project.longitude.toFixed(4) : "77.5946"}° E (Constituency: ${project.constituency})`,
-    photoDocumentAvailability: documents.some((d) => d.document_type.includes("Photo") || d.document_type.includes("Site"))
+    inspectionState: isOfficial
+      ? "Not available in source dataset"
+      : progressLogs.length > 0
+      ? `${progressLogs.length} Verified Field Inspection Logs on Record`
+      : "Initial Milestone - Ground Verification Pending",
+    geoLocationRecordState: isOfficial
+      ? `Constituency: ${project.constituency}, State: ${project.state} (Geo-coordinates not available in source dataset)`
+      : `${project.latitude ? project.latitude.toFixed(4) : "12.9716"}° N, ${project.longitude ? project.longitude.toFixed(4) : "77.5946"}° E (Constituency: ${project.constituency})`,
+    photoDocumentAvailability: isOfficial
+      ? "Not available in source dataset"
+      : documents.some((d) => d.document_type.includes("Photo") || d.document_type.includes("Site"))
       ? "Site Geotagged Photographs Available"
       : "Site Photographs Awaiting Upload",
-    verificationLogs: progressLogs.map((log) => ({
-      id: `prog-${log.id}`,
-      inspectionDate: log.record_date,
-      inspectorName: log.inspection_officer || "Executive Engineer, Nodal Agency",
-      status: "Recorded in Measurement Book",
-      notes: `Stage: ${log.stage_name} (${log.progress_percentage}% completed)`,
-      photoUrl: undefined,
-      geoCoordinates: `${project.latitude ? project.latitude.toFixed(4) : "12.9716"}° N, ${project.longitude ? project.longitude.toFixed(4) : "77.5946"}° E`,
-      source: "Canonical Physical Progress Events (SQLite)",
-    })),
-    source: "SQLite Physical Progress Store",
+    verificationLogs: isOfficial
+      ? []
+      : progressLogs.map((log) => ({
+          id: `prog-${log.id}`,
+          inspectionDate: log.record_date,
+          inspectorName: log.inspection_officer || "Executive Engineer, Nodal Agency",
+          status: "Recorded in Measurement Book",
+          notes: `Stage: ${log.stage_name} (${log.progress_percentage}% completed)`,
+          photoUrl: undefined,
+          geoCoordinates: `${project.latitude ? project.latitude.toFixed(4) : "12.9716"}° N, ${project.longitude ? project.longitude.toFixed(4) : "77.5946"}° E`,
+          source: "Canonical Physical Progress Events (SQLite)",
+        })),
+    source: isOfficial ? "Official SIH26102 Source Dataset" : "SQLite Physical Progress Store",
   };
 
   // Map Documents
-  const documentEvidence: DocumentEvidenceItem[] = documents.map((doc) => ({
-    id: `doc-${doc.id}`,
-    documentName: doc.document_name,
-    documentType: doc.document_type,
-    availability: doc.verification_status !== "Missing" ? "Available" : "Missing",
-    verificationStatus: doc.verification_status === "Verified" ? "Verified by Auditor" : "Unverified",
-    source: "Canonical Statutory Documents (SQLite)",
-  }));
+  const documentEvidence: DocumentEvidenceItem[] = isOfficial
+    ? []
+    : documents.map((doc) => ({
+        id: `doc-${doc.id}`,
+        documentName: doc.document_name,
+        documentType: doc.document_type,
+        availability: doc.verification_status !== "Missing" ? "Available" : "Missing",
+        verificationStatus: doc.verification_status === "Verified" ? "Verified by Auditor" : "Unverified",
+        source: "Canonical Statutory Documents (SQLite)",
+      }));
 
   // Build Timeline Events
-  const timelineEvents: TimelineEvent[] = [
-    {
-      id: "ev-rec",
-      timestamp: project.recommendation_date,
-      title: "MP Work Recommendation Submitted",
-      description: `Recommendation initiated by Member of Parliament for ${project.constituency}.`,
-      actor: "Member of Parliament",
-      source: "Administrative Registry",
-      type: "project_registered",
-    },
-    {
-      id: "ev-sanc",
-      timestamp: project.sanction_date,
-      title: "Administrative Sanction Issued",
-      description: `Formal sanction of INR ${project.sanctioned_amount.toLocaleString("en-IN")} authorized by District Authority.`,
-      actor: "District Collector / Authority",
-      source: "Sanction Order Registry",
-      type: "admin_approval",
-    },
-  ];
+  const timelineEvents: TimelineEvent[] = isOfficial
+    ? [
+        {
+          id: "ev-import",
+          timestamp: (project as any).last_updated || "2024-06-04",
+          title: "Official Parliamentary Allocation Limit Ingested",
+          description: `Source: ${(project as any).source_file || "Allocated Limit for Honble MPs.csv"} (Row #${(project as any).source_row || "—"}). Hon'ble MP: ${(project as any).mp_name || "—"}. Allocation Ceiling: ₹${(project.sanctioned_amount / 1e7).toFixed(2)} Cr.`,
+          actor: "Ministry of Statistics & Programme Implementation (MoSPI)",
+          source: "Official SIH26102 Source Dataset",
+          type: "project_registered",
+        },
+      ]
+    : [
+        {
+          id: "ev-rec",
+          timestamp: project.recommendation_date,
+          title: "MP Work Recommendation Submitted",
+          description: `Recommendation initiated by Member of Parliament for ${project.constituency}.`,
+          actor: "Member of Parliament",
+          source: "Administrative Registry",
+          type: "project_registered",
+        },
+        {
+          id: "ev-sanc",
+          timestamp: project.sanction_date,
+          title: "Administrative Sanction Issued",
+          description: `Formal sanction of INR ${project.sanctioned_amount.toLocaleString("en-IN")} authorized by District Authority.`,
+          actor: "District Collector / Authority",
+          source: "Sanction Order Registry",
+          type: "admin_approval",
+        },
+      ];
 
   if (payments.length > 0) {
     timelineEvents.push({

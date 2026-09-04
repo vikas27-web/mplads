@@ -59,8 +59,38 @@ CREATE TABLE IF NOT EXISTS projects (
     verification_status TEXT NOT NULL,
     documentation_status TEXT NOT NULL,
     scenario_type TEXT NOT NULL,
-    scenario_description TEXT NOT NULL
+    scenario_description TEXT NOT NULL,
+    is_official INTEGER DEFAULT 0,
+    source_file TEXT,
+    source_row INTEGER,
+    mp_name TEXT,
+    reservation_category TEXT,
+    data_quality_notes TEXT
 );
+
+-- Official Parliamentary Constituency Scheme Allocations (SIH26102 Source of Truth)
+CREATE TABLE IF NOT EXISTS official_allocations (
+    id TEXT PRIMARY KEY,
+    sr_no INTEGER NOT NULL,
+    state TEXT NOT NULL,
+    state_code TEXT NOT NULL,
+    mp_name TEXT NOT NULL,
+    constituency TEXT NOT NULL,
+    raw_constituency TEXT NOT NULL,
+    reservation_category TEXT NOT NULL,
+    allocated_amount REAL NOT NULL,
+    allocated_amount_crores REAL NOT NULL,
+    baseline_divergence_pct REAL NOT NULL,
+    data_quality_notes TEXT,
+    source_file TEXT NOT NULL,
+    source_row INTEGER NOT NULL,
+    imported_at TEXT NOT NULL,
+    schema_version TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_alloc_state ON official_allocations(state);
+CREATE INDEX IF NOT EXISTS idx_alloc_mp ON official_allocations(mp_name);
+CREATE INDEX IF NOT EXISTS idx_alloc_const ON official_allocations(constituency);
 
 CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,

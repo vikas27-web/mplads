@@ -1,6 +1,6 @@
 import React from "react";
-import { DemoDisclaimer } from "@/components/ui/DemoDisclaimer";
 import { Badge } from "@/components/ui/Badge";
+import { ShieldCheck } from "lucide-react";
 
 export interface ProjectExplorerHeaderProps {
   totalCount: number;
@@ -22,16 +22,19 @@ export const ProjectExplorerHeader: React.FC<ProjectExplorerHeaderProps> = ({ to
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#0F1724", margin: 0 }}>
-            Project Explorer
+            Parliamentary Allocation Explorer
           </h1>
-          <Badge variant="info">{totalCount.toLocaleString()} projects</Badge>
+          <Badge variant="info">{totalCount.toLocaleString()} Parliamentary Records</Badge>
         </div>
         <p style={{ fontSize: "13px", color: "#6B7A8E", margin: "4px 0 0" }}>
-          Multi-parameter filter and search catalog for MPLAD scheme work recommendations and anomaly signals
+          Official parliamentary allocation catalog for 543 Lok Sabha Members of Parliament across 36 States/UTs with automated audit anomaly detection
         </p>
       </div>
       <div style={{ flexShrink: 0 }}>
-        <DemoDisclaimer />
+        <Badge variant="success">
+          <ShieldCheck style={{ width: "13px", height: "13px", marginRight: "4px" }} />
+          Official SIH26102 Source
+        </Badge>
       </div>
     </div>
   );

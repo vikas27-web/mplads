@@ -99,10 +99,33 @@ export class DatabaseManager {
   }
 
   /**
+   * Drops all domain and staging tables cleanly
+   */
+  public clearTables(): void {
+    this.db.exec(`
+      PRAGMA foreign_keys = OFF;
+      DROP TABLE IF EXISTS payments;
+      DROP TABLE IF EXISTS physical_progress_events;
+      DROP TABLE IF EXISTS documents;
+      DROP TABLE IF EXISTS auditor_reviews;
+      DROP TABLE IF EXISTS auditor_notes;
+      DROP TABLE IF EXISTS projects;
+      DROP TABLE IF EXISTS official_allocations;
+      DROP TABLE IF EXISTS constituencies;
+      DROP TABLE IF EXISTS districts;
+      DROP TABLE IF EXISTS implementing_agencies;
+      DROP TABLE IF EXISTS contractors;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
+  /**
    * Seeds the database with the synthetic dataset bundle in a single transaction
    */
   public seedDataset(bundle: SyntheticDatasetBundle): void {
+    this.clearTables();
     this.initSchema();
+    this.ensureAuditorTables();
 
     this.db.exec("BEGIN TRANSACTION;");
     try {
@@ -231,6 +254,156 @@ export class DatabaseManager {
           doc.upload_date,
           doc.verification_status
         );
+      }
+
+      this.db.exec("COMMIT;");
+    } catch (err) {
+      this.db.exec("ROLLBACK;");
+      throw err;
+    }
+  }
+
+  /**
+   * Seeds the database with the official SIH dataset (543 MPs)
+   */
+  public seedOfficialDataset(allocations: any[]): void {
+    this.clearTables();
+    this.initSchema();
+    this.ensureAuditorTables();
+
+    this.db.exec("BEGIN TRANSACTION;");
+    try {
+      // 1. Insert official allocations into official_allocations table
+      const stmtAlloc = this.db.prepare(`
+        INSERT OR REPLACE INTO official_allocations (
+          id, sr_no, state, state_code, mp_name, constituency, raw_constituency,
+          reservation_category, allocated_amount, allocated_amount_crores,
+          baseline_divergence_pct, data_quality_notes, source_file, source_row,
+          imported_at, schema_version
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        );
+      `);
+
+      // 2. Insert into projects table as canonical operational projects
+      const stmtProj = this.db.prepare(`
+        INSERT OR REPLACE INTO projects (
+          project_code, project_title, recommendation_date, status, state, constituency,
+          district, block_or_town, latitude, longitude, sector, work_category,
+          implementing_agency, contractor_id, contractor_name, sanctioned_amount,
+          released_amount, expenditure_amount, planned_completion_date,
+          actual_or_reported_completion_date, physical_progress, sanction_date,
+          start_date, expected_completion_date, last_updated, verification_status,
+          documentation_status, scenario_type, scenario_description, is_official,
+          source_file, source_row, mp_name, reservation_category, data_quality_notes
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        );
+      `);
+
+      // 3. Insert unique constituencies
+      const stmtConst = this.db.prepare(
+        "INSERT OR REPLACE INTO constituencies (code, name, state, district) VALUES (?, ?, ?, ?);"
+      );
+
+      // 4. Insert unique districts / states
+      const stmtDist = this.db.prepare(
+        "INSERT OR REPLACE INTO districts (code, name, state) VALUES (?, ?, ?);"
+      );
+
+      // 5. Insert nodal agency
+      const stmtAgy = this.db.prepare(
+        "INSERT OR REPLACE INTO implementing_agencies (code, name, agency_type, state) VALUES (?, ?, ?, ?);"
+      );
+
+      stmtAgy.run(
+        "AGY-NODAL-MPLAD",
+        "District Collectorate / Parliamentary Nodal Authority",
+        "District Administration",
+        "All States"
+      );
+
+      const seenDistricts = new Set<string>();
+
+      for (const a of allocations) {
+        const qualityNotes =
+          Array.isArray(a.dataQualityNotes) && a.dataQualityNotes.length > 0
+            ? a.dataQualityNotes.join("; ")
+            : null;
+
+        stmtAlloc.run(
+          a.id,
+          a.srNo,
+          a.state,
+          a.stateCode,
+          a.mpName,
+          a.constituency,
+          a.rawConstituency,
+          a.reservationCategory,
+          a.allocatedAmount,
+          a.allocatedAmountCrores,
+          a.baselineDivergencePct,
+          qualityNotes,
+          a.sourceMetadata.sourceFile,
+          a.sourceMetadata.sourceRow,
+          a.sourceMetadata.importedAt,
+          a.sourceMetadata.schemaVersion
+        );
+
+        stmtProj.run(
+          a.id,
+          `MPLAD Allocation Limit — Hon'ble MP ${a.mpName} (${a.constituency})`,
+          "2024-06-04",
+          "Sanctioned",
+          a.state,
+          a.constituency,
+          a.constituency,
+          "Not available in source dataset",
+          0.0,
+          0.0,
+          "Parliamentary Constituency Fund",
+          "MPLAD Scheme Allocation Limit",
+          "District Collectorate / Parliamentary Nodal Authority",
+          "NOT_AVAILABLE",
+          "Not available in source dataset",
+          a.allocatedAmount,
+          a.allocatedAmount,
+          0.0,
+          "2029-05-31",
+          null,
+          0.0,
+          "2024-06-04",
+          "2024-06-04",
+          "2029-05-31",
+          a.sourceMetadata.importedAt,
+          "Pending Review",
+          "Complete",
+          "NORMAL",
+          "Official SIH26102 Source Record",
+          1,
+          a.sourceMetadata.sourceFile,
+          a.sourceMetadata.sourceRow,
+          a.mpName,
+          a.reservationCategory,
+          qualityNotes
+        );
+
+        stmtConst.run(
+          `CONST-${a.stateCode}-${a.srNo}`,
+          a.constituency,
+          a.state,
+          a.constituency
+        );
+
+        const distKey = `${a.state}::${a.constituency}`;
+        if (!seenDistricts.has(distKey)) {
+          seenDistricts.add(distKey);
+          stmtDist.run(
+            `DIST-${a.stateCode}-${a.srNo}`,
+            a.constituency,
+            a.state
+          );
+        }
       }
 
       this.db.exec("COMMIT;");

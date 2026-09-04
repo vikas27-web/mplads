@@ -22,7 +22,9 @@ async function runSmokeTests() {
   console.log("=========================================");
 
   const repo = new ProjectRepository();
-  const testProjectCode = "MPLAD-DEMO-000004";
+  const allProjects = repo.getAllProjects();
+  const totalCount = allProjects.length;
+  const testProjectCode = allProjects[0].project_code;
 
   // 1. Health
   const health = getHealthStatus();
@@ -32,7 +34,7 @@ async function runSmokeTests() {
   // 2. Projects
   const projectsRes = getProjects({ limit: 5 });
   console.log(`✓ 2. Projects Service: total=${projectsRes.totalCount}, returned=${projectsRes.projects.length}`);
-  if (projectsRes.totalCount !== 300) throw new Error("Expected 300 projects");
+  if (projectsRes.totalCount !== totalCount) throw new Error(`Expected ${totalCount} projects, got ${projectsRes.totalCount}`);
 
   // 3. Project Detail
   const projectDetail = getProjectByCode(testProjectCode);
@@ -42,12 +44,12 @@ async function runSmokeTests() {
   // 4. Dashboard
   const dashboard = getDashboardData();
   console.log(`✓ 4. Dashboard Service: totalProjects=${dashboard.kpis.totalProjects}, totalAnomalies=${dashboard.kpis.totalAnomalies}`);
-  if (dashboard.kpis.totalProjects !== 300) throw new Error("Expected 300 projects in dashboard");
+  if (dashboard.kpis.totalProjects !== totalCount) throw new Error(`Expected ${totalCount} projects in dashboard`);
 
   // 5. Anomalies List
   const anomalies = getAnomalies({ limit: 5 });
   console.log(`✓ 5. Anomalies Service: totalEvaluated=${anomalies.total}, returned=${anomalies.results.length}`);
-  if (anomalies.total !== 300) throw new Error("Expected 300 evaluated projects");
+  if (anomalies.total !== totalCount) throw new Error(`Expected ${totalCount} evaluated projects`);
 
   // 6. Project Anomaly Detail
   const anomalyDetail = getAnomalyResultByCode(testProjectCode);

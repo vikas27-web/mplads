@@ -16,8 +16,12 @@ import {
 } from "../features/pipeline.ts";
 import { validateFeatureRecord, validateFeatureDataset } from "../features/validator.ts";
 import { FEATURE_VERSION, REFERENCE_AUDIT_DATE, type FeatureRecord } from "../features/types.ts";
+import { DatabaseManager } from "../database/sqlite.ts";
 
-const repo = new ProjectRepository();
+const benchmarkDbPath = path.join(process.cwd(), "data", "benchmark", "mplad_benchmark_database.sqlite");
+const repo = fs.existsSync(benchmarkDbPath)
+  ? new ProjectRepository(new DatabaseManager(benchmarkDbPath))
+  : new ProjectRepository();
 
 test("1. Feature Generation for Single Project", () => {
   const record = generateProjectFeatures("MPLAD-DEMO-000001", repo);
@@ -394,7 +398,7 @@ test("16. Feature Version & Metadata Integrity", () => {
 });
 
 test("17. Full Pipeline Execution & Export Verification", () => {
-  const exportPath = path.join(process.cwd(), "data", "processed", "project_features.json");
+  const exportPath = path.join(process.cwd(), "data", "benchmark", "project_features.json");
   const result = exportProjectFeatures({ repo, outputPath: exportPath });
 
   assert.strictEqual(result.recordCount, 300);

@@ -60,7 +60,10 @@ import {
 import { runAnomalyDetectionEngine } from "../engine.ts";
 import { runAnomalyPipeline, loadProjectFeaturesFromDisk } from "../pipeline.ts";
 
-const features = loadProjectFeaturesFromDisk();
+const benchmarkFeaturesPath = path.join(process.cwd(), "data", "benchmark", "project_features.json");
+const features = fs.existsSync(benchmarkFeaturesPath)
+  ? loadProjectFeaturesFromDisk(benchmarkFeaturesPath)
+  : loadProjectFeaturesFromDisk();
 
 test("1. Rule detector output schema conformity", () => {
   const sample = features[0];
@@ -372,7 +375,8 @@ test("18. Complete engine execution and output schema", () => {
 });
 
 test("19. Exactly 300 projects processed in pipeline", () => {
-  const pipelineRes = runAnomalyPipeline({ features });
+  const benchmarkOutputPath = path.join(process.cwd(), "data", "benchmark", "anomaly_results.json");
+  const pipelineRes = runAnomalyPipeline({ features, outputPath: benchmarkOutputPath });
   assert.strictEqual(pipelineRes.projectCount, 300, "Pipeline must evaluate exactly 300 projects");
   assert.strictEqual(pipelineRes.results.length, 300);
   assert.ok(pipelineRes.signalsCount > 0, "Signals should be generated");

@@ -29,6 +29,12 @@ import { detectDuplicateWork } from "./rules/duplicateWorkRule.ts";
 import { detectContractorConcentration } from "./rules/contractorConcentrationRule.ts";
 import { detectMissingDocumentation } from "./rules/missingDocumentationRule.ts";
 import { detectMultiSignal } from "./rules/multiSignalRule.ts";
+import {
+  detectOfficialAllocationOutlier,
+  detectOfficialCompletenessRule,
+  detectOfficialStateDisparityRule,
+  computeStateMedians,
+} from "./rules/officialAllocationRules.ts";
 import { detectStatisticalOutliers } from "./statistical/robustStats.ts";
 import { buildFeatureMatrix } from "./ml/featureMatrix.ts";
 import { runIsolationForestDetection } from "./ml/isolationForest.ts";
@@ -52,6 +58,9 @@ export function runAnomalyDetectionEngine(
     a.project_code.localeCompare(b.project_code)
   );
 
+  const isOfficialDataset = sortedRecords.some((r) => r.project_code.startsWith("MPLAD-OFFICIAL-"));
+  const stateMedians = isOfficialDataset ? computeStateMedians(sortedRecords) : new Map<string, number>();
+
   // 2. Statistical Outlier Detection across dataset
   const statisticalSignalsMap = detectStatisticalOutliers(sortedRecords);
 
@@ -64,32 +73,59 @@ export function runAnomalyDetectionEngine(
 
   for (const rec of sortedRecords) {
     const projectSignals: AnomalySignal[] = [];
+    const isOfficial = rec.project_code.startsWith("MPLAD-OFFICIAL-");
 
-    // Rule Detectors
-    projectSignals.push(...detectPhysicalFinancialMismatch(rec));
-    projectSignals.push(...detectTimelineInconsistency(rec));
-    projectSignals.push(...detectPaymentPattern(rec));
-    projectSignals.push(...detectExpenditureShift(rec));
-    projectSignals.push(...detectDuplicateWork(rec, sortedRecords));
-    projectSignals.push(...detectContractorConcentration(rec));
-    projectSignals.push(...detectMissingDocumentation(rec));
+    if (isOfficial) {
+      // Capability-aware detectors for Official Dataset:
+      // Only execute detectors for genuinely available source dimensions!
+      projectSignals.push(...detectOfficialAllocationOutlier(rec));
+      projectSignals.push(...detectOfficialCompletenessRule(rec));
+      projectSignals.push(...detectOfficialStateDisparityRule(rec, stateMedians));
 
-    // Statistical Signals
-    const statSignals = statisticalSignalsMap.get(rec.project_code);
-    if (statSignals) {
-      projectSignals.push(...statSignals);
-    }
+      // Statistical Signals
+      const statSignals = statisticalSignalsMap.get(rec.project_code);
+      if (statSignals) {
+        projectSignals.push(...statSignals);
+      }
 
-    // Isolation Forest Signals
-    const ifSignals = isolationForestSignalsMap.get(rec.project_code);
-    if (ifSignals) {
-      projectSignals.push(...ifSignals);
-    }
+      // Isolation Forest Signals
+      const ifSignals = isolationForestSignalsMap.get(rec.project_code);
+      if (ifSignals) {
+        projectSignals.push(...ifSignals);
+      }
 
-    // Multi-Signal Detector (triggers if >= 2 distinct primary domains detected)
-    const multiSig = detectMultiSignal(rec.project_code, projectSignals);
-    if (multiSig) {
-      projectSignals.push(multiSig);
+      // Multi-Signal Detector (triggers if >= 2 distinct primary domains detected)
+      const multiSig = detectMultiSignal(rec.project_code, projectSignals);
+      if (multiSig) {
+        projectSignals.push(multiSig);
+      }
+    } else {
+      // Synthetic Benchmark Rules (only executed for synthetic test datasets)
+      projectSignals.push(...detectPhysicalFinancialMismatch(rec));
+      projectSignals.push(...detectTimelineInconsistency(rec));
+      projectSignals.push(...detectPaymentPattern(rec));
+      projectSignals.push(...detectExpenditureShift(rec));
+      projectSignals.push(...detectDuplicateWork(rec, sortedRecords));
+      projectSignals.push(...detectContractorConcentration(rec));
+      projectSignals.push(...detectMissingDocumentation(rec));
+
+      // Statistical Signals
+      const statSignals = statisticalSignalsMap.get(rec.project_code);
+      if (statSignals) {
+        projectSignals.push(...statSignals);
+      }
+
+      // Isolation Forest Signals
+      const ifSignals = isolationForestSignalsMap.get(rec.project_code);
+      if (ifSignals) {
+        projectSignals.push(...ifSignals);
+      }
+
+      // Multi-Signal Detector (triggers if >= 2 distinct primary domains detected)
+      const multiSig = detectMultiSignal(rec.project_code, projectSignals);
+      if (multiSig) {
+        projectSignals.push(multiSig);
+      }
     }
 
     // Aggregate signals into consolidated AnomalyResult

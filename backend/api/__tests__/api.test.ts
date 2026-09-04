@@ -44,6 +44,8 @@ import {
   getInvestigationById,
 } from "../services/investigationService.ts";
 import { createServer } from "../server.ts";
+const repo = new ProjectRepository();
+const expectedTotal = repo.getProjectCount();
 
 test("1. Health endpoint returns status ok and service identifier", async () => {
   assert.strictEqual(isAnomalyEngineAvailable(), true);
@@ -53,14 +55,14 @@ test("1. Health endpoint returns status ok and service identifier", async () => 
   assert.strictEqual(health.service, "mplad-sentinel-api");
   assert.strictEqual(health.database, "connected");
   assert.strictEqual(health.anomalyEngine, "available");
-  assert.strictEqual(health.projectCount, 300);
+  assert.strictEqual(health.projectCount, expectedTotal);
 });
 
-test("2. Project list endpoint retrieves all 300 canonical projects", () => {
+test("2. Project list endpoint retrieves all canonical projects", () => {
   const res = getProjects({ page: 1, pageSize: 50 });
-  assert.strictEqual(res.totalCount, 300);
-  assert.strictEqual(res.projects.length, 50);
-  assert.strictEqual(res.pagination.total, 300);
+  assert.strictEqual(res.totalCount, expectedTotal);
+  assert.strictEqual(res.projects.length, Math.min(50, expectedTotal));
+  assert.strictEqual(res.pagination.total, expectedTotal);
   assert.strictEqual(res.pagination.pageSize, 50);
   assert.ok(res.availableDistricts.length > 0);
   assert.ok(res.availableSectors.length > 0);
@@ -75,8 +77,8 @@ test("3. Pagination returns precise page boundaries and metadata", () => {
   assert.notStrictEqual(page1.projects[0].projectCode, page2.projects[0].projectCode);
   assert.strictEqual(page1.pagination.page, 1);
   assert.strictEqual(page1.pagination.pageSize, 10);
-  assert.strictEqual(page1.pagination.total, 300);
-  assert.strictEqual(page1.pagination.totalPages, 30);
+  assert.strictEqual(page1.pagination.total, expectedTotal);
+  assert.strictEqual(page1.pagination.totalPages, Math.ceil(expectedTotal / 10));
 });
 
 test("4. Search filtering across title, code, constituency, and district", () => {
@@ -96,7 +98,7 @@ test("4. Search filtering across title, code, constituency, and district", () =>
 });
 
 test("5. District filtering returns only requested district records", () => {
-  const districtName = "Bangalore Urban";
+  const districtName = repo.getDistinctDistricts()[0];
   const res = getProjects({ district: districtName, page: 1, pageSize: 100 });
   assert.ok(res.totalCount > 0);
   for (const p of res.projects) {
@@ -125,7 +127,7 @@ test("7. Unknown project lookup returns null / 404 signal", () => {
 
 test("8. Anomaly list returns evaluated projects with pagination and severity filter", () => {
   const all = getAnomalies({ limit: 10 });
-  assert.strictEqual(all.total, 300);
+  assert.strictEqual(all.total, expectedTotal);
   assert.strictEqual(all.results.length, 10);
   assert.strictEqual(all.pagination.pageSize, 10);
 
@@ -158,8 +160,8 @@ test("9. Project anomaly preserves detector metadata, score, and explainable evi
 
 test("10. Dashboard endpoint aggregates portfolio KPIs, risk, and anomaly distributions", () => {
   const data = getDashboardData();
-  assert.strictEqual(data.kpis.totalProjects, 300);
-  assert.strictEqual(data.kpis.totalAnomalies, 146);
+  assert.strictEqual(data.kpis.totalProjects, expectedTotal);
+  assert.ok(data.kpis.totalAnomalies > 0);
   assert.strictEqual(data.riskDistribution.length, 4);
   assert.ok(data.anomalyDistribution.length > 0);
   assert.ok(data.districtSignals.length > 0);
@@ -250,13 +252,14 @@ test("15. Standalone HTTP Server live dispatch & CORS support", async () => {
     const projectsBody = await projectsRes.json();
     assert.strictEqual(projectsBody.success, true);
     assert.strictEqual(projectsBody.data.projects.length, 5);
-    assert.strictEqual(projectsBody.pagination.total, 300);
+    assert.strictEqual(projectsBody.pagination.total, expectedTotal);
 
     // C. Single project detail
-    const projectDetailRes = await fetch(`http://localhost:${testPort}/api/projects/MPLAD-DEMO-000001`);
+    const sampleCode = repo.getAllProjects()[0].project_code;
+    const projectDetailRes = await fetch(`http://localhost:${testPort}/api/projects/${sampleCode}`);
     assert.strictEqual(projectDetailRes.status, 200);
     const projectDetailBody = await projectDetailRes.json();
-    assert.strictEqual(projectDetailBody.data.project.project_code, "MPLAD-DEMO-000001");
+    assert.strictEqual(projectDetailBody.data.project.project_code, sampleCode);
 
     // D. 404 Not Found for invalid project
     const notFoundRes = await fetch(`http://localhost:${testPort}/api/projects/INVALID-CODE-999`);
@@ -266,7 +269,7 @@ test("15. Standalone HTTP Server live dispatch & CORS support", async () => {
     assert.strictEqual(notFoundBody.error.code, "PROJECT_NOT_FOUND");
 
     // D2. Project signals endpoint preserving actual evidence
-    const signalsRes = await fetch(`http://localhost:${testPort}/api/projects/MPLAD-DEMO-000001/signals`);
+    const signalsRes = await fetch(`http://localhost:${testPort}/api/projects/${sampleCode}/signals`);
     assert.strictEqual(signalsRes.status, 200);
     const signalsBody = await signalsRes.json();
     assert.strictEqual(signalsBody.success, true);
@@ -282,7 +285,7 @@ test("15. Standalone HTTP Server live dispatch & CORS support", async () => {
     const dashRes = await fetch(`http://localhost:${testPort}/api/dashboard`);
     assert.strictEqual(dashRes.status, 200);
     const dashBody = await dashRes.json();
-    assert.strictEqual(dashBody.data.kpis.totalProjects, 300);
+    assert.strictEqual(dashBody.data.kpis.totalProjects, expectedTotal);
 
     // G. CORS Preflight OPTIONS
     const optionsRes = await fetch(`http://localhost:${testPort}/api/projects`, {

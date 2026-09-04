@@ -65,6 +65,20 @@ export interface PriorityProject {
   lastUpdated: string;
 }
 
+export interface DataQualitySummary {
+  sourceFile: string;
+  totalSourceRows: number;
+  acceptedRows: number;
+  rejectedRows: number;
+  duplicateRows: number;
+  grandTotalExcluded: number;
+  missingCriticalFields: number;
+  dataCompletenessScore: string;
+  totalAllocatedCrores: number;
+  reconciliationDelta: number;
+  lastIngestedAt: string;
+}
+
 export interface DashboardData {
   isDemoData: boolean;
   disclaimerText: string;
@@ -78,4 +92,5 @@ export interface DashboardData {
   agencySignals: AgencySignal[];
   prioritySignals: PrioritySignal[];
   priorityProjects: PriorityProject[];
+  dataQuality?: DataQualitySummary;
 }

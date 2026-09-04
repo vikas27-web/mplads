@@ -17,6 +17,7 @@ import { PrioritySignalsPanel } from "@/components/dashboard/PrioritySignalsPane
 import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTable";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
+import { DataQualitySection } from "@/components/dashboard/DataQualitySection";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -99,9 +100,16 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* 1. Header Section */}
-      <DashboardHeader isDemoData={data.isDemoData} lastUpdatedText={data.kpis.lastUpdatedText} />
+      <DashboardHeader
+        isDemoData={data.isDemoData}
+        lastUpdatedText={data.kpis.lastUpdatedText}
+        dataSource={data.dataSource}
+      />
 
-      {/* 2. KPI Overview */}
+      {/* 2. Official Dataset Quality Audit Section */}
+      <DataQualitySection dataQuality={data.dataQuality} />
+
+      {/* 3. KPI Overview */}
       <DashboardKpiGrid kpis={data.kpis} />
 
       {/* 3. Filter Controls */}

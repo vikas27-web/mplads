@@ -442,7 +442,7 @@ function LoginForm() {
                   }}
                 >
                   <CheckCircle2 style={{ width: "12px", height: "12px" }} />
-                  Pre-configured
+                  SIH Prototype Authentication
                 </span>
               </div>
 
@@ -485,8 +485,11 @@ function LoginForm() {
                     width: "100%",
                   }}
                 >
-                  Auto-fill Demo Credentials
+                  Auto-fill Prototype Credentials
                 </button>
+                <div style={{ fontSize: "10px", color: "#64748B", textAlign: "center", marginTop: "4px" }}>
+                  Prototype demonstration credentials for SIH26102 evaluation — not actual government credentials.
+                </div>
               </div>
             </div>
           </div>

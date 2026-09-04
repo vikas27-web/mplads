@@ -1,0 +1,204 @@
+{
+  "sourceFiles": [
+    "Allocated Limit for Honble MPs.csv"
+  ],
+  "totalRowsRead": 544,
+  "grandTotalRowsExcluded": 1,
+  "acceptedRows": 543,
+  "rejectedRows": 0,
+  "duplicateRows": 0,
+  "missingFieldStats": {
+    "state": 0,
+    "mpName": 0,
+    "constituency": 0,
+    "allocatedAmount": 1
+  },
+  "stateBreakdown": {
+    "Maharashtra": {
+      "count": 49,
+      "totalAllocated": 7342285090.939999,
+      "totalAllocatedCrores": 734.2285
+    },
+    "Jammu And Kashmir": {
+      "count": 5,
+      "totalAllocated": 742773472.11,
+      "totalAllocatedCrores": 74.2773
+    },
+    "Bihar": {
+      "count": 40,
+      "totalAllocated": 5999462522.87,
+      "totalAllocatedCrores": 599.9463
+    },
+    "West Bengal": {
+      "count": 42,
+      "totalAllocated": 6391333259.29,
+      "totalAllocatedCrores": 639.1333
+    },
+    "Uttar Pradesh": {
+      "count": 80,
+      "totalAllocated": 12111756374.810001,
+      "totalAllocatedCrores": 1211.1756
+    },
+    "Kerala": {
+      "count": 20,
+      "totalAllocated": 3110874325.9900007,
+      "totalAllocatedCrores": 311.0874
+    },
+    "Uttarakhand": {
+      "count": 5,
+      "totalAllocated": 735000000,
+      "totalAllocatedCrores": 73.5
+    },
+    "Manipur": {
+      "count": 2,
+      "totalAllocated": 294000000,
+      "totalAllocatedCrores": 29.4
+    },
+    "Madhya Pradesh": {
+      "count": 29,
+      "totalAllocated": 4430471672.8,
+      "totalAllocatedCrores": 443.0472
+    },
+    "Assam": {
+      "count": 14,
+      "totalAllocated": 2010300157.1100001,
+      "totalAllocatedCrores": 201.03
+    },
+    "Andhra Pradesh": {
+      "count": 25,
+      "totalAllocated": 4047877732.0800014,
+      "totalAllocatedCrores": 404.7878
+    },
+    "Rajasthan": {
+      "count": 25,
+      "totalAllocated": 3767573544.82,
+      "totalAllocatedCrores": 376.7574
+    },
+    "Punjab": {
+      "count": 12,
+      "totalAllocated": 1780626330.54,
+      "totalAllocatedCrores": 178.0626
+    },
+    "Odisha": {
+      "count": 21,
+      "totalAllocated": 3288850789.9800005,
+      "totalAllocatedCrores": 328.8851
+    },
+    "Tamil Nadu": {
+      "count": 39,
+      "totalAllocated": 6138473649.83,
+      "totalAllocatedCrores": 613.8474
+    },
+    "Meghalaya": {
+      "count": 2,
+      "totalAllocated": 245000000,
+      "totalAllocatedCrores": 24.5
+    },
+    "Jharkhand": {
+      "count": 14,
+      "totalAllocated": 2114316383.3500004,
+      "totalAllocatedCrores": 211.4316
+    },
+    "Himachal Pradesh": {
+      "count": 4,
+      "totalAllocated": 629523041.33,
+      "totalAllocatedCrores": 62.9523
+    },
+    "Telangana": {
+      "count": 17,
+      "totalAllocated": 2943774227.1500006,
+      "totalAllocatedCrores": 294.3774
+    },
+    "Delhi": {
+      "count": 7,
+      "totalAllocated": 1117190622,
+      "totalAllocatedCrores": 111.7191
+    },
+    "Karnataka": {
+      "count": 28,
+      "totalAllocated": 4272103415.3300004,
+      "totalAllocatedCrores": 427.2103
+    },
+    "Gujarat": {
+      "count": 26,
+      "totalAllocated": 3846967459.4700003,
+      "totalAllocatedCrores": 384.6967
+    },
+    "Chhattisgarh": {
+      "count": 11,
+      "totalAllocated": 1671719691.53,
+      "totalAllocatedCrores": 167.172
+    },
+    "Tripura": {
+      "count": 2,
+      "totalAllocated": 294000000,
+      "totalAllocatedCrores": 29.4
+    },
+    "Andaman And Nicobar Islands": {
+      "count": 1,
+      "totalAllocated": 147000000,
+      "totalAllocatedCrores": 14.7
+    },
+    "Goa": {
+      "count": 2,
+      "totalAllocated": 294000000,
+      "totalAllocatedCrores": 29.4
+    },
+    "Haryana": {
+      "count": 10,
+      "totalAllocated": 1578454264,
+      "totalAllocatedCrores": 157.8454
+    },
+    "Sikkim": {
+      "count": 1,
+      "totalAllocated": 152003923.11,
+      "totalAllocatedCrores": 15.2004
+    },
+    "The Dadra And Nagar Haveli And Daman And Diu": {
+      "count": 2,
+      "totalAllocated": 392063957,
+      "totalAllocatedCrores": 39.2064
+    },
+    "Arunachal Pradesh": {
+      "count": 2,
+      "totalAllocated": 294000000,
+      "totalAllocatedCrores": 29.4
+    },
+    "Chandigarh": {
+      "count": 1,
+      "totalAllocated": 178351443.75,
+      "totalAllocatedCrores": 17.8351
+    },
+    "Ladakh": {
+      "count": 1,
+      "totalAllocated": 161114542,
+      "totalAllocatedCrores": 16.1115
+    },
+    "Lakshadweep": {
+      "count": 1,
+      "totalAllocated": 153942460.41,
+      "totalAllocatedCrores": 15.3942
+    },
+    "Mizoram": {
+      "count": 1,
+      "totalAllocated": 147000000,
+      "totalAllocatedCrores": 14.7
+    },
+    "Nagaland": {
+      "count": 1,
+      "totalAllocated": 147000000,
+      "totalAllocatedCrores": 14.7
+    },
+    "Puducherry": {
+      "count": 1,
+      "totalAllocated": 209368972.11,
+      "totalAllocatedCrores": 20.9369
+    }
+  },
+  "nationalTotalAllocated": 83180553325.71004,
+  "nationalTotalAllocatedCrores": 8318.06,
+  "nationalGrandTotalReported": 83180553325.71,
+  "reconciliationDelta": 0.000030517578125,
+  "validationErrors": [],
+  "generatedAt": "2026-09-04T16:45:11.526Z"
+}
