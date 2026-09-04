@@ -38,16 +38,17 @@ function getAllowedOrigins(): string[] {
   if (envOrigins) {
     return envOrigins.split(",").map((o) => o.trim());
   }
-  return ["http://localhost:3000", "http://localhost:3005"];
+  return ["http://localhost:3000", "http://localhost:3005", "http://127.0.0.1:3000"];
 }
 
 function handleCors(req: IncomingMessage, res: ServerResponse): boolean {
   const origin = req.headers.origin;
+  const envOrigins = process.env.CORS_ORIGIN;
   const allowedOrigins = getAllowedOrigins();
 
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  if (envOrigins === "*" || !origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization");
     res.setHeader("Access-Control-Max-Age", "86400");
   }
@@ -83,17 +84,18 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse): 
     return;
   }
 
-  const host = req.headers.host || "localhost:4000";
-  const protocol = "http";
+  const port = process.env.PORT || "4000";
+  const host = req.headers.host || `0.0.0.0:${port}`;
+  const protocol = req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : "http";
   const reqUrl = new URL(req.url || "/", `${protocol}://${host}`);
   const pathname = reqUrl.pathname.replace(/\/+$/, "") || "/";
   const searchParams = reqUrl.searchParams;
 
   try {
-    // 1. GET /api/health
-    if (pathname === "/api/health") {
+    // 1. GET /api/health or /health
+    if (pathname === "/api/health" || pathname === "/health") {
       const health = getHealthStatus();
-      sendJson(res, health.status === "ok" ? 200 : 503, {
+      sendJson(res, health.status === "healthy" || health.status === "ok" ? 200 : 503, {
         success: true,
         data: health,
         meta: { timestamp: new Date().toISOString() },

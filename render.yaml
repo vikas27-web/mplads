@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: mplad-sentinel
+    runtime: docker
+    plan: standard
+    region: singapore
+    branch: master
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_PATH
+        value: /var/data/mplad_database.sqlite
+      - key: ANOMALY_RESULTS_PATH
+        value: /app/data/processed/anomaly_results.json
+      - key: CORS_ORIGIN
+        value: "*"
+    disk:
+      name: mplad-data
+      mountPath: /var/data
+      sizeGB: 1
+    healthCheckPath: /health

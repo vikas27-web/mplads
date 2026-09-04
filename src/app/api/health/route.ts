@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const data = getHealthStatus();
-    return jsonSuccess(data, {}, data.status === "healthy" ? 200 : 503);
+    return jsonSuccess(data, {}, (data.status === "ok" || data.status === "healthy") ? 200 : 503);
   } catch (err) {
     return jsonError(
       "HEALTH_CHECK_FAILED",

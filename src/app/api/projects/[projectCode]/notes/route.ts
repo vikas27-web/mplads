@@ -45,13 +45,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return jsonError("INVALID_PAYLOAD", "Request body must be valid JSON.", 400);
     }
 
-    const { author, note } = body as { author?: string; note?: string };
-    if (!note || !note.trim()) {
+    const { author, note, content } = body as { author?: string; note?: string; content?: string };
+    const noteText = (note || content || "").trim();
+    if (!noteText) {
       return jsonError("MISSING_NOTE_CONTENT", "Auditor note text is required.", 400);
     }
 
     const safeAuthor = (author && author.trim()) || "Field Auditor";
-    const record = addProjectAuditorNote(projectCode, safeAuthor, note.trim());
+    const record = addProjectAuditorNote(projectCode, safeAuthor, noteText);
 
     return jsonSuccess({
       note: {

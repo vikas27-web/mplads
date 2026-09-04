@@ -13,6 +13,8 @@ export class DatabaseManager {
       process.env.DATABASE_PATH ||
       path.join(process.cwd(), "data", "generated", "mplad_database.sqlite");
 
+    const defaultSeedPath = path.join(process.cwd(), "data", "generated", "mplad_database.sqlite");
+
     // Serverless / Read-Only Filesystem Handling:
     // If running in Vercel or AWS Lambda, mirror database into /tmp to support persistent write operations
     if (resolvedPath !== ":memory:" && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)) {
@@ -26,6 +28,20 @@ export class DatabaseManager {
       }
       if (fs.existsSync(tmpPath)) {
         resolvedPath = tmpPath;
+      }
+    }
+
+    // If a custom persistent DATABASE_PATH is provided (e.g. Docker mounted volume /var/data/...)
+    // but the file does not exist yet, initialize it from the bundled seed database
+    if (resolvedPath !== ":memory:" && !fs.existsSync(resolvedPath) && fs.existsSync(defaultSeedPath) && resolvedPath !== defaultSeedPath) {
+      try {
+        const targetDir = path.dirname(resolvedPath);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+        fs.copyFileSync(defaultSeedPath, resolvedPath);
+      } catch {
+        // Fall back to resolved path
       }
     }
 

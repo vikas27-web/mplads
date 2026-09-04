@@ -11,7 +11,10 @@ let cachedResults: AnomalyResult[] | null = null;
 let cachedMap: Map<string, AnomalyResult> | null = null;
 
 function getAnomalyResultsFilePath(): string {
-  return path.join(process.cwd(), "data", "processed", "anomaly_results.json");
+  return (
+    process.env.ANOMALY_RESULTS_PATH ||
+    path.join(process.cwd(), "data", "processed", "anomaly_results.json")
+  );
 }
 
 export function isAnomalyEngineAvailable(): boolean {

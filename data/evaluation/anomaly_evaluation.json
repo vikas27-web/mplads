@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "evaluatedAt": "2026-09-04T15:42:04.324Z",
+    "evaluatedAt": "2026-09-04T16:05:07.499Z",
     "engineVersion": "1.0.0",
     "totalProjects": 300,
     "datasetGroundTruthNote": "Ground truth scenario_type labels are synthetic benchmark data generated in Phase 6 for model evaluation only. Detectors are strictly prohibited from utilizing ground truth.",

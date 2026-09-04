@@ -1,183 +1,172 @@
-# MPLAD SENTINEL — Deployment & Operations Guide (Phase 9)
+# MPLAD SENTINEL — Production Deployment Guide
+**SIH26102 — Audit Intelligence Platform**
 
-This guide provides comprehensive instructions for running, testing, building, and deploying **MPLAD SENTINEL** (SIH26102) as a production-grade institutional audit intelligence system.
-
----
-
-## 1. System Requirements & Architecture
-
-- **Node.js**: `v22.0.0` or higher (Recommended: Node 22.x or 24.x LTS).
-  - MPLAD SENTINEL uses Node's native built-in `node:sqlite` (`DatabaseSync`), requiring zero external native compilation tools (no `node-gyp`, no Python, no C++ build chain).
-- **Package Manager**: `npm` (v10+).
-- **Operating Systems Supported**: Linux (Ubuntu 20.04+, Debian 11+, Alpine 3.19+ with glibc/compat), macOS (12+), Windows (10/11, PowerShell).
-- **Architecture**:
-  ```
-  SQLite Database (data/generated/mplad_database.sqlite)
-  + Anomaly Engine Artifacts (data/processed/anomaly_results.json)
-                         │
-                         ▼
-     Backend Intelligence & Repository Layer (TypeScript)
-                         │
-                         ▼
-      Next.js App Router API Routes (/api/*) 
-      OR Standalone REST Server (backend/api/server.ts)
-                         │
-                         ▼
-    Central Typed API Client (src/lib/api-client/index.ts)
-                         │
-                         ▼
-     Institutional Audit Web Interface (Next.js 14 UI)
-  ```
+This guide provides exhaustive instructions for deploying **MPLAD SENTINEL** in production environments.
 
 ---
 
-## 2. Environment Configuration
+## 1. Deployment Architecture Overview
 
-Copy the sample environment file to create your local `.env`:
+MPLAD SENTINEL uses Node 22 native `node:sqlite` for high-throughput, low-latency relational queries, and filesystem-backed JSON artifacts for pre-evaluated anomaly matrices.
 
-```bash
-cp .env.example .env.local
 ```
-
-### Supported Environment Variables
-
-| Variable | Default Value | Description |
-| :--- | :--- | :--- |
-| `NODE_ENV` | `development` / `production` | Node runtime environment. |
-| `PORT` | `3000` | Port for Next.js web application server. |
-| `DATABASE_PATH` | `data/generated/mplad_database.sqlite` | Absolute or relative path to SQLite database file. Automatically falls back to `/tmp/mplad_database.sqlite` if running in read-only serverless environments. |
-| `ANOMALY_RESULTS_PATH` | `data/processed/anomaly_results.json` | Path to Phase 8 explainable anomaly intelligence artifact. |
-| `NEXT_PUBLIC_API_URL` | *Empty* (Relative `/api`) | Optional external API URL prefix. Leave empty for same-origin Next.js fullstack deployment. |
-| `CORS_ORIGIN` | `*` | Allowed CORS origins for standalone REST API server (`backend/api/server.ts`). |
+┌─────────────────────────────────────────────────────────────┐
+│                      Client / Browser                       │
+│              (Auditors, Field Reviewers, Public)             │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ HTTPS
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Reverse Proxy / CDN                     │
+│               (Cloudflare, Render, AWS ALB, etc.)            │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  MPLAD SENTINEL Application                 │
+│                                                             │
+│   Next.js 14 Web UI  ◄────────►  Next.js REST API           │
+│   (Server / Client Pages)         (App Router /api)         │
+│                                           │                 │
+│                                           ▼                 │
+│                              Backend Intelligence Layer     │
+│                              - ProjectRepository            │
+│                              - AnomalyService               │
+│                              - InvestigationService         │
+│                                           │                 │
+│                                           ▼                 │
+│                        ┌──────────────────────────────────┐ │
+│                        │       Persistent Storage         │ │
+│                        │ - mplad_database.sqlite          │ │
+│                        │ - anomaly_results.json           │ │
+│                        │ - project_features.json          │ │
+│                        └──────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 3. Quick Start (Local Development)
+## 2. Platform Compatibility & SQLite Persistence
 
-### Step 1: Install Dependencies
-```bash
-npm install
-```
+### Why Persistence Matters
+In MPLAD SENTINEL, auditors submit review determinations (*"Schedule Inspection"*, *"Request Additional Evidence"*, *"Close Review"*) and append timestamped investigation notes. These actions write to the `auditor_reviews` and `auditor_notes` SQLite tables.
 
-### Step 2: Verify Artifacts
-The repository includes pre-generated canonical Phase 6, Phase 7, and Phase 8 artifacts:
-- `data/generated/mplad_database.sqlite` (300 projects, 600 payments, 573 progress records, 900 documents)
-- `data/processed/project_features.json` (65 features across 300 projects)
-- `data/processed/anomaly_results.json` (Phase 8 explainable anomaly signals)
+| Platform | SQLite Persistence Support | Recommendation |
+|---|---|---|
+| **Render.com** (Docker + Disk) | **Full Native Persistence** (Mounted Volume) | **Recommended (Production)** |
+| **Railway / Fly.io / VPS** (Docker) | **Full Native Persistence** (Volume Mount) | **Recommended (Production)** |
+| **AWS EC2 / DigitalOcean** | **Full Native Persistence** | **Recommended (Enterprise)** |
+| **Vercel** (Serverless) | **Temporary Ephemeral** (Auto-mirrored to `/tmp`) | Good for read-only preview/demo |
 
-If you wish to regenerate the artifacts from scratch deterministically:
-```bash
-npm run generate:data     # Regenerate synthetic dataset
-npm run init:db           # Initialize SQLite schema & seed tables
-npm run features:generate # Extract 65 features
-npm run anomaly:run       # Execute explainable anomaly detection pipeline
-```
-
-### Step 3: Run the Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+> **Note on Serverless Fallback:** When deployed on Vercel or AWS Lambda, the application detects the serverless environment and automatically copies `mplad_database.sqlite` to `/tmp/mplad_database.sqlite`. Writes succeed during the lifetime of the warm container instance, but will not persist across container cold starts unless a persistent container is used.
 
 ---
 
-## 4. Production Build & Execution
+## 3. Option A: 1-Click Render.com Deployment (Recommended)
 
-### Step 1: Run Full Test Suite
-Ensure all 77 automated tests pass:
-```bash
-npm run test:data      # 13/13 Phase 6 dataset & repository tests
-npm run test:features  # 17/17 Phase 7 feature pipeline tests
-npm run test:anomaly   # 20/20 Phase 8 anomaly detector & engine tests
-npm run test:api       # 16/16 Phase 9 REST API integration tests
-npm run test:smoke     # 11/11 Live API endpoint & persistence smoke tests
-```
+Render provides Docker runtime with persistent disk volumes, ensuring full SQLite persistence.
 
-### Step 2: Compile Production Bundle
-```bash
-npm run typecheck      # Zero TypeScript errors
-npm run lint           # Zero ESLint errors
-npm run build          # Builds all 23 Next.js static and server routes
-```
-
-### Step 3: Start Production Server
-```bash
-npm run start
-```
-The application will serve production traffic at [http://localhost:3000](http://localhost:3000).
+### Using `render.yaml` Blueprint
+1. Push your repository to GitHub or GitLab.
+2. Log in to [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** → **Blueprint**.
+4. Connect your repository. Render detects `render.yaml` automatically:
+   - **Service Name:** `mplad-sentinel`
+   - **Runtime:** Docker (`./Dockerfile`)
+   - **Disk:** `mplad-data` (1 GB mounted at `/var/data`)
+   - **Health Check:** `/health`
+5. Click **Apply**.
+6. Render builds the Docker image, mounts the disk, runs health checks, and provisions a public HTTPS URL (e.g., `https://mplad-sentinel.onrender.com`).
 
 ---
 
-## 5. Standalone REST API Server (Optional)
+## 4. Option B: Docker Container Deployment
 
-If running the REST API independently from the frontend:
+The repository includes a production multi-stage `Dockerfile`:
 
-```bash
-# Starts Node.js native HTTP API server on port 4000
-npm run api:start
-```
-API endpoints will be accessible at `http://localhost:4000/api/health`, `http://localhost:4000/api/dashboard`, `http://localhost:4000/api/projects`, etc.
-
----
-
-## 6. Container Deployment (Docker)
-
-The repository includes a production-ready `Dockerfile` and `.dockerignore`.
-
-### Build Docker Image
+### 1. Build Docker Image
 ```bash
 docker build -t mplad-sentinel:latest .
 ```
 
-### Run Docker Container
+### 2. Run Container with Persistent Volume
 ```bash
 docker run -d \
   --name mplad-sentinel \
   -p 3000:3000 \
-  -v mplad_data:/app/data/generated \
+  -v mplad_storage:/app/data \
   -e NODE_ENV=production \
+  -e PORT=3000 \
+  --restart unless-stopped \
   mplad-sentinel:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to access the system.
+### 3. Verify Container Health
+```bash
+curl -f http://localhost:3000/health
+```
+Response:
+```json
+{
+  "status": "ok",
+  "service": "mplad-sentinel",
+  "timestamp": "2026-09-04T16:07:00.000Z",
+  "checks": {
+    "status": "ok",
+    "service": "mplad-sentinel-api",
+    "database": "connected",
+    "anomalyEngine": "available",
+    "projectCount": 300,
+    "version": "1.0.0"
+  }
+}
+```
 
 ---
 
-## 7. Cloud Deployment Compatibility
+## 5. Option C: Vercel Deployment
 
-### Vercel / Netlify / AWS Amplify
-1. **Serverless Filesystem**:
-   - Next.js serverless functions have a read-only root filesystem with a writeable `/tmp` directory.
-   - `backend/database/sqlite.ts` detects read-only filesystems automatically and mirrors the SQLite database into `/tmp/mplad_database.sqlite` on cold start, allowing auditor review notes and action status persistence to function seamlessly.
-2. **Build Settings**:
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
-   - Install Command: `npm install`
-   - Node.js Version: `>= 22.0.0`
+For rapid preview deployment:
 
-### VPS / Dedicated VM (Ubuntu / Debian / AWS EC2 / DigitalOcean)
-1. Install Node.js 22+:
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   ```
-2. Clone repository and setup PM2 process manager:
-   ```bash
-   git clone <repo-url> /opt/mplad-sentinel
-   cd /opt/mplad-sentinel
-   npm install
-   npm run build
-   sudo npm install -g pm2
-   pm2 start npm --name "mplad-sentinel" -- start
-   pm2 save
-   pm2 startup
-   ```
+### 1. Install & Login
+```bash
+npx vercel login
+```
+
+### 2. Deploy
+```bash
+npx vercel --prod
+```
+The repository includes `vercel.json` preconfigured with `cleanUrls: true` and the Next.js framework preset.
 
 ---
 
-## 8. Responsible AI & Operational Integrity
+## 6. Environment Variables
 
-- **Deterministic & Auditable**: Every score, signal, and anomaly report links directly to mathematical evidence (MAD deviation scores, tree split depths, rule trigger records).
-- **Anti-Defamation Policy**: The system strictly disallows accusing contractors, agencies, or officials of fraud. All indicators are flagged as *Review Priority* or *Potential Anomaly Signals*.
-- **Demo Data Notice**: As this is an institutional prototype, all screens display the notice:
-  > *"DEMO DATA — NOT OFFICIAL GOVERNMENT DATA. Anomaly signal does not equal fraud. Physical verification & human investigation required."*
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `PORT` | No | `3000` | Port for the HTTP server |
+| `NODE_ENV` | No | `production` | Node environment |
+| `DATABASE_PATH` | No | `./data/generated/mplad_database.sqlite` | SQLite database file path. When using Docker volumes, set to `/var/data/mplad_database.sqlite` |
+| `ANOMALY_RESULTS_PATH` | No | `./data/processed/anomaly_results.json` | Path to verified Phase 8 anomaly results |
+| `NEXT_PUBLIC_API_URL` | No | `""` (auto `window.location.origin`) | Base URL for REST API calls if API is deployed to a separate domain |
+| `CORS_ORIGIN` | No | `*` | Allowed CORS origins (comma-separated list or `*`) |
+
+---
+
+## 7. Health Probes & Monitoring
+
+The application provides two machine-readable health endpoints:
+- `GET /health`: Standard HTTP 200/503 health probe for load balancers (Kubernetes, AWS ALB, Render).
+- `GET /api/health`: JSON envelope containing status of SQLite connection, anomaly engine availability, and total project count.
+
+---
+
+## 8. Troubleshooting
+
+### Issue: Database not found or permission denied
+- **Cause:** Running in an environment where the non-root user cannot write to `./data`.
+- **Fix:** In Docker, `/app/data` is automatically chowned to `nextjs:nodejs`. For custom volume mounts, ensure user ID 1001 has write permissions.
+
+### Issue: CORS error when hosting API on separate domain
+- **Fix:** Set `CORS_ORIGIN=https://your-frontend-domain.com` (or `*` for permissive access).
