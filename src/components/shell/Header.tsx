@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
-import { Menu, User } from "lucide-react";
+import React, { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, User, LogOut } from "lucide-react";
 
 export interface HeaderProps {
   onToggleMobileSidebar: () => void;
@@ -18,6 +18,20 @@ const routeTitles: Record<string, string> = {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Proceed with redirect regardless
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   const getTitle = () => {
     if (routeTitles[pathname]) return routeTitles[pathname];
@@ -159,6 +173,41 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
             <span style={{ fontSize: "10px", color: "#9BA8B5" }}>Field Verification</span>
           </div>
         </div>
+
+        {/* Logout Action */}
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          title="Sign Out of Auditor Session"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "5px 10px",
+            fontSize: "12px",
+            fontWeight: 500,
+            color: "#6B7A8E",
+            background: "#F8F9FB",
+            border: "1px solid #DDE2EA",
+            borderRadius: "6px",
+            cursor: isLoggingOut ? "not-allowed" : "pointer",
+            transition: "all 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#DC2626";
+            e.currentTarget.style.borderColor = "#FCA5A5";
+            e.currentTarget.style.background = "#FEF2F2";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#6B7A8E";
+            e.currentTarget.style.borderColor = "#DDE2EA";
+            e.currentTarget.style.background = "#F8F9FB";
+          }}
+          aria-label="Sign out"
+        >
+          <LogOut style={{ width: "13px", height: "13px" }} />
+          <span className="hidden sm:inline">{isLoggingOut ? "Signing Out..." : "Logout"}</span>
+        </button>
       </div>
     </header>
   );
