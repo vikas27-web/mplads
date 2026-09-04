@@ -5,7 +5,7 @@ import { AppLayoutProvider } from "@/components/shell/AppLayoutProvider";
 export const metadata: Metadata = {
   title: "MPLAD SENTINEL — Audit Intelligence Platform",
   description:
-    "Anomaly detection and audit intelligence platform for the MPLAD Scheme (SIH26102). DEMO DATA — NOT OFFICIAL GOVERNMENT DATA.",
+    "Anomaly detection and audit intelligence platform for the MPLAD Scheme (SIH26102). Official SIH26102 dataset with explainable audit intelligence.",
 };
 
 export default function RootLayout({

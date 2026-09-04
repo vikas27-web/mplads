@@ -1,11 +1,11 @@
 /**
  * Canonical Project and Domain Types for MPLAD SENTINEL Data & Intelligence Foundation
  *
- * IMPORTANT DISCLAIMER:
- * DEMO DATA — NOT OFFICIAL GOVERNMENT DATA
+ * IMPORTANT NOTICE:
+ * OFFICIAL SIH DATASET • AUDIT PROTOTYPE
  *
- * Scenario labels represent synthetic ground truth for testing future detection models
- * and are NOT the output of an anomaly engine.
+ * Primary operational data corresponds to official SIH26102 dataset.
+ * Benchmark scenario labels are isolated for testing detection models.
  */
 
 export type ScenarioType =

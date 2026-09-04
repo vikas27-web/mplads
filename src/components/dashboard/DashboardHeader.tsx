@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/Badge";
-import { ShieldCheck, Database } from "lucide-react";
+import { ShieldCheck, Database, Info } from "lucide-react";
 
 interface DashboardHeaderProps {
   isDemoData?: boolean;
@@ -9,7 +9,6 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  isDemoData,
   lastUpdatedText,
   dataSource,
 }) => {
@@ -31,17 +30,34 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         }}
       >
         <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: "4px",
+                background: "#EBF5FF",
+                color: "#0080FF",
+                border: "1px solid #B3D7FF",
+                letterSpacing: "0.02em",
+              }}
+            >
+              OFFICIAL SIH DATASET • AUDIT PROTOTYPE
+            </span>
+          </div>
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#0F1724", margin: 0, lineHeight: 1.2 }}>
             Audit Portfolio Dashboard
           </h1>
           <p style={{ fontSize: "13px", color: "#6B7A8E", margin: "4px 0 0" }}>
-            MPLAD scheme anomaly intelligence · Phase 8 & 12 Detection Pipeline
+            Source: SIH26102 official dataset · 543 Lok Sabha Parliamentary Constituencies
           </p>
         </div>
+
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Badge variant="success" size="md">
             <ShieldCheck style={{ width: "13px", height: "13px", marginRight: "5px" }} />
-            Official SIH26102 Dataset Active
+            Official SIH26102 Dataset
           </Badge>
           {lastUpdatedText && (
             <span style={{ fontSize: "11px", color: "#6B7A8E", fontFamily: "JetBrains Mono, monospace" }}>
@@ -51,15 +67,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
       </div>
 
-      {/* Official Dataset Provenance Banner */}
+      {/* Responsible AI Callout */}
       <div
         style={{
           padding: "10px 14px",
           borderRadius: "6px",
-          background: "#F0F7FF",
-          border: "1px solid #B3D7FF",
+          background: "#F8FAFC",
+          border: "1px solid #E2E8F0",
           fontSize: "12px",
-          color: "#004799",
+          color: "#334155",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -68,23 +84,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Database style={{ width: "15px", height: "15px", color: "#0080FF", flexShrink: 0 }} />
+          <Info style={{ width: "15px", height: "15px", color: "#0080FF", flexShrink: 0 }} />
           <span>
-            <strong>OFFICIAL DATASET:</strong> {dataSource || "Supplied SIH26102 official dataset (543 Lok Sabha MPs across 36 States/UTs, ₹8,318.06 Cr)"}
+            <strong>Responsible AI Notice:</strong> Anomaly signal does not equal fraud. Evidence requires human verification.
           </span>
         </div>
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            background: "#FFFFFF",
-            padding: "2px 8px",
-            borderRadius: "4px",
-            border: "1px solid #CCE4FF",
-            color: "#0066CC",
-          }}
-        >
-          Primary Application Data Source
+        <span style={{ fontSize: "11px", color: "#64748B" }}>
+          {dataSource || "Source: SIH26102 official dataset (₹8,318.05 Cr)"}
         </span>
       </div>
     </div>

@@ -86,36 +86,36 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
 
       {/* Right: notices + auditor identity */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        {/* Demo data notice */}
+        {/* Official dataset notice */}
         <span
-          className="hidden sm:inline-flex"
+          className="hidden sm:inline-flex items-center gap-1"
           style={{
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: 600,
-            padding: "2px 8px",
-            background: "#FFFBEB",
-            border: "1px solid #FDE68A",
-            color: "#92400E",
+            padding: "3px 9px",
+            background: "#F0F7FF",
+            border: "1px solid #B3D7FF",
+            color: "#0052B3",
             borderRadius: "4px",
-            letterSpacing: "0.05em",
+            letterSpacing: "0.02em",
           }}
         >
-          DEMO DATA — NOT OFFICIAL GOVERNMENT DATA
+          OFFICIAL SIH DATASET • AUDIT PROTOTYPE
         </span>
 
-        {/* AI notice */}
+        {/* Responsible AI notice */}
         <span
           className="hidden lg:inline-flex"
           style={{
             fontSize: "10px",
-            padding: "2px 8px",
-            background: "rgba(0,128,255,0.06)",
-            border: "1px solid rgba(0,128,255,0.18)",
-            color: "#1a5fa8",
+            padding: "3px 8px",
+            background: "#F8F9FA",
+            border: "1px solid #E2E8F0",
+            color: "#475569",
             borderRadius: "4px",
           }}
         >
-          Signals require human verification
+          Anomaly signal does not equal fraud. Evidence requires human verification.
         </span>
 
         {/* System status */}

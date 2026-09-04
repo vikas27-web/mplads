@@ -1,7 +1,9 @@
 import React from "react";
+import { ShieldCheck } from "lucide-react";
 
 /**
- * Demo data disclaimer — always visible as required by Phase 9 spec.
+ * Official SIH Dataset & Audit Prototype indicator
+ * Replaces old demo disclaimer with clear official source attribution
  */
 export const DemoDisclaimer: React.FC = () => {
   return (
@@ -9,18 +11,20 @@ export const DemoDisclaimer: React.FC = () => {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "2px 8px",
-        fontSize: "10px",
+        gap: "5px",
+        padding: "3px 9px",
+        fontSize: "11px",
         fontWeight: 600,
-        background: "#FFFBEB",
-        border: "1px solid #FDE68A",
-        color: "#92400E",
+        background: "#F0F7FF",
+        border: "1px solid #B3D7FF",
+        color: "#0052B3",
         borderRadius: "4px",
-        letterSpacing: "0.04em",
+        letterSpacing: "0.02em",
         whiteSpace: "nowrap",
       }}
     >
-      DEMO DATA — NOT OFFICIAL GOVERNMENT DATA
+      <ShieldCheck style={{ width: "13px", height: "13px", color: "#0080FF" }} />
+      OFFICIAL SIH DATASET • AUDIT PROTOTYPE
     </span>
   );
 };

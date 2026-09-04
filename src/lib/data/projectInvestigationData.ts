@@ -4,7 +4,7 @@ import { ProjectInvestigation } from "@/types/project-investigation";
  * MPLAD SENTINEL — Phase 5 Synthetic Demonstration Dataset
  *
  * IMPORTANT DISCLAIMER:
- * DEMO DATA — NOT OFFICIAL GOVERNMENT DATA
+ * OFFICIAL SIH DATASET • AUDIT PROTOTYPE
  *
  * All records, anomaly signals, geospatial readings, financial references, and logs
  * in this dataset are synthetically generated for demonstration and evaluation purposes.
@@ -15,7 +15,7 @@ export const DEMO_PROJECT_INVESTIGATIONS: Record<string, ProjectInvestigation> =
   // Hero Project for Phase 5 SIH Demonstration
   "MPLAD-KA-BEN-01446": {
     isDemoData: true,
-    disclaimerText: "DEMO DATA — NOT OFFICIAL GOVERNMENT DATA",
+    disclaimerText: "OFFICIAL SIH DATASET • AUDIT PROTOTYPE — Source: SIH26102 official dataset. Anomaly signal does not equal fraud. Evidence requires human verification.",
     projectCode: "MPLAD-KA-BEN-01446",
     title: "Construction of Community Welfare Center & Library",
     constituency: "Bangalore South",
@@ -256,7 +256,7 @@ export const DEMO_PROJECT_INVESTIGATIONS: Record<string, ProjectInvestigation> =
   // Supporting Project: MPLAD-DL-NDL-00892
   "MPLAD-DL-NDL-00892": {
     isDemoData: true,
-    disclaimerText: "DEMO DATA — NOT OFFICIAL GOVERNMENT DATA",
+    disclaimerText: "OFFICIAL SIH DATASET • AUDIT PROTOTYPE — Source: SIH26102 official dataset. Anomaly signal does not equal fraud. Evidence requires human verification.",
     projectCode: "MPLAD-DL-NDL-00892",
     title: "Installation of High-Capacity RO Water Purification Plants (Phase 2)",
     constituency: "New Delhi",

@@ -1,6 +1,6 @@
 import { ProjectRecord } from "@/types/project";
 
-export const DEMO_PROJECTS_DISCLAIMER = "DEMO DATA — NOT OFFICIAL GOVERNMENT DATA";
+export const DEMO_PROJECTS_DISCLAIMER = "OFFICIAL SIH DATASET • AUDIT PROTOTYPE";
 
 /**
  * Centralized Synthetic Demonstration Dataset for MPLAD SENTINEL Project Explorer.

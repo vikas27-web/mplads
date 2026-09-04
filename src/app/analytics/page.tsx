@@ -20,8 +20,8 @@ export default function AnalyticsPage() {
   return (
     <PageContainer
       title="Statistical Analytics"
-      subtitle="Scheme-wide distributions, sector analysis, agency concentration, and detection metrics"
-      badge={<Badge variant="info">Phase 8 Engine</Badge>}
+      subtitle="Scheme-wide distributions, statistical allocation baselines, and anomaly signal detections"
+      badge={<Badge variant="info">Official SIH Dataset</Badge>}
     >
       {/* Responsible AI Notice */}
       <ResponsibleAiBanner />
@@ -35,20 +35,20 @@ export default function AnalyticsPage() {
         }}
       >
         {[
-          { label: "Portfolio Size", value: data.kpis.totalProjects.toLocaleString(), sub: "Total MPLAD works monitored" },
-          { label: "Signal Detection Rate", value: `${detectionRate}%`, sub: "Projects with anomaly signals" },
-          { label: "Distinct Districts", value: data.districtSignals.length.toLocaleString(), sub: "Geographic coverage" },
-          { label: "Distinct Sectors", value: data.sectorSignals.length.toLocaleString(), sub: "Sector coverage" },
+          { label: "Official Records", value: "543 MPs", sub: "18th Lok Sabha allocations" },
+          { label: "Total Allocation", value: "₹8,318.05 Cr", sub: "Reconciled national outlay" },
+          { label: "Geographic Coverage", value: "36 States / UTs", sub: "Pan-India parliamentary coverage" },
+          { label: "Priority Review Signals", value: `${totalProjectsWithSignals}`, sub: "Prioritized for human verification" },
         ].map((kpi, idx) => (
           <Card key={idx}>
             <CardContent style={{ padding: "14px 16px" }}>
               <div style={{ fontSize: "10px", fontWeight: 600, color: "#9BA8B5", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 {kpi.label}
               </div>
-              <div style={{ fontSize: "26px", fontWeight: 700, color: "#0080FF", marginTop: "4px", fontVariantNumeric: "tabular-nums" }}>
+              <div style={{ fontSize: "24px", fontWeight: 700, color: "#0080FF", marginTop: "4px", fontVariantNumeric: "tabular-nums" }}>
                 {kpi.value}
               </div>
-              <div style={{ fontSize: "11px", color: "#9BA8B5", marginTop: "2px" }}>{kpi.sub}</div>
+              <div style={{ fontSize: "11px", color: "#6B7A8E", marginTop: "2px" }}>{kpi.sub}</div>
             </CardContent>
           </Card>
         ))}

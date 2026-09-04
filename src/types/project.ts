@@ -22,9 +22,11 @@ export type SortDirection = "asc" | "desc";
 
 export interface ProjectFilterParams {
   search?: string;
+  state?: string;
   district?: string;
   sector?: string;
   severity?: string;
+  signalType?: string;
   status?: string;
   sortBy?: SortField;
   sortOrder?: SortDirection;
@@ -38,7 +40,9 @@ export interface ProjectListResponse {
   page: number;
   limit: number;
   totalPages: number;
+  availableStates?: string[];
   availableDistricts: string[];
   availableSectors: string[];
   availableStatuses: string[];
+  availableSignalTypes?: string[];
 }

@@ -189,15 +189,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse,
               style={{
                 fontSize: "9px",
                 fontWeight: 600,
-                padding: "1px 5px",
-                background: "#FFFBEB",
-                border: "1px solid #FDE68A",
-                color: "#92400E",
+                padding: "2px 6px",
+                background: "#F0F7FF",
+                border: "1px solid #B3D7FF",
+                color: "#0052B3",
                 borderRadius: "3px",
-                letterSpacing: "0.04em",
+                letterSpacing: "0.02em",
               }}
             >
-              DEMO DATA
+              OFFICIAL SIH DATASET
             </span>
           </div>
           <p style={{ fontSize: "10px", color: "#9BA8B5", lineHeight: 1.4, margin: 0 }}>

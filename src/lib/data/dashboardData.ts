@@ -9,7 +9,7 @@ import { DashboardData } from "@/types/dashboard";
  */
 export const DEMO_DASHBOARD_DATA: DashboardData = {
   isDemoData: true,
-  disclaimerText: "DEMO DATA — NOT OFFICIAL GOVERNMENT DATA",
+  disclaimerText: "OFFICIAL SIH DATASET • AUDIT PROTOTYPE — Source: SIH26102 official dataset. Anomaly signal does not equal fraud. Evidence requires human verification.",
   kpis: {
     totalProjects: 520,
     totalAnomalies: 42,

@@ -142,6 +142,15 @@ export class ProjectRepository {
   }
 
   /**
+   * Retrieves unique distinct states represented in the dataset
+   */
+  public getDistinctStates(): string[] {
+    const stmt = this.db.prepare("SELECT DISTINCT state FROM projects ORDER BY state ASC;");
+    const rows = stmt.all() as unknown as { state: string }[];
+    return rows.map((r) => r.state).filter(Boolean);
+  }
+
+  /**
    * Retrieves distinct contractor entities
    */
   public getDistinctContractors(): ContractorRecord[] {

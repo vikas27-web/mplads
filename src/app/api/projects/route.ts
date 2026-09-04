@@ -23,9 +23,11 @@ export async function GET(request: NextRequest) {
 
     const params: ProjectQueryParams = {
       search: searchParams.get("search") || undefined,
+      state: searchParams.get("state") || undefined,
       district: searchParams.get("district") || undefined,
       sector: searchParams.get("sector") || undefined,
       severity: searchParams.get("severity") || undefined,
+      signalType: searchParams.get("signalType") || undefined,
       status: searchParams.get("status") || undefined,
       sortBy: (searchParams.get("sortBy") || searchParams.get("sort") || undefined) as any,
       sortOrder: (searchParams.get("sortOrder") as any) || undefined,

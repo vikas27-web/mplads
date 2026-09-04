@@ -9,11 +9,15 @@ import { ProjectFilterControls } from "@/components/projects/ProjectFilterContro
 import { ProjectTable } from "@/components/projects/ProjectTable";
 import { ProjectPagination } from "@/components/projects/ProjectPagination";
 
+import { ResponsibleAiBanner } from "@/components/ui/ResponsibleAiBanner";
+
 const DEFAULT_PARAMS: ProjectFilterParams = {
   search: "",
+  state: "ALL",
   district: "ALL",
   sector: "ALL",
   severity: "ALL",
+  signalType: "ALL",
   status: "ALL",
   sortBy: "projectCode",
   sortOrder: "asc",
@@ -61,14 +65,19 @@ export default function ProjectsPage() {
       {/* 1. Page Header */}
       <ProjectExplorerHeader totalCount={response?.totalCount || 0} />
 
+      {/* Responsible AI Banner */}
+      <ResponsibleAiBanner />
+
       {/* 2. Search & Filter Controls */}
       <ProjectFilterControls
         params={params}
         onChange={handleParamChange}
         onReset={handleResetFilters}
+        availableStates={response?.availableStates || []}
         availableDistricts={response?.availableDistricts || []}
         availableSectors={response?.availableSectors || []}
         availableStatuses={response?.availableStatuses || []}
+        availableSignalTypes={response?.availableSignalTypes || []}
       />
 
       {/* 3. Main Data Table or State View */}

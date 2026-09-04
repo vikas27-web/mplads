@@ -18,6 +18,7 @@ import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTa
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
 import { DataQualitySection } from "@/components/dashboard/DataQualitySection";
+import { DataProvenanceCard } from "@/components/ui/DataProvenanceCard";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -106,10 +107,13 @@ export default function DashboardPage() {
         dataSource={data.dataSource}
       />
 
-      {/* 2. Official Dataset Quality Audit Section */}
+      {/* 2. Official Dataset Provenance */}
+      <DataProvenanceCard />
+
+      {/* 3. Official Dataset Quality Audit Section */}
       <DataQualitySection dataQuality={data.dataQuality} />
 
-      {/* 3. KPI Overview */}
+      {/* 4. KPI Overview */}
       <DashboardKpiGrid kpis={data.kpis} />
 
       {/* 3. Filter Controls */}

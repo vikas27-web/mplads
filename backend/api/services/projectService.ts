@@ -85,32 +85,43 @@ export function getProjects(params: ProjectQueryParams = {}): ProjectListRespons
         item.title.toLowerCase().includes(q) ||
         item.constituency.toLowerCase().includes(q) ||
         item.district.toLowerCase().includes(q) ||
+        item.state.toLowerCase().includes(q) ||
         item.implementingAgency.toLowerCase().includes(q) ||
         item.contractorName.toLowerCase().includes(q)
     );
   }
 
-  // 3. Filter: District
+  // 3. Filter: State
+  if (params.state && params.state !== "ALL") {
+    items = items.filter((item) => item.state === params.state);
+  }
+
+  // 4. Filter: District
   if (params.district && params.district !== "ALL") {
     items = items.filter((item) => item.district === params.district);
   }
 
-  // 4. Filter: Sector
+  // 5. Filter: Sector
   if (params.sector && params.sector !== "ALL") {
     items = items.filter((item) => item.sector === params.sector);
   }
 
-  // 5. Filter: Severity (STRICT BACKEND ANOMALY RESULT SEVERITY)
+  // 6. Filter: Severity (STRICT BACKEND ANOMALY RESULT SEVERITY)
   if (params.severity && params.severity !== "ALL") {
     items = items.filter((item) => item.severity === params.severity);
   }
 
-  // 6. Filter: Status
+  // 7. Filter: Signal Type
+  if (params.signalType && params.signalType !== "ALL") {
+    items = items.filter((item) => item.signal === params.signalType);
+  }
+
+  // 8. Filter: Status
   if (params.status && params.status !== "ALL") {
     items = items.filter((item) => item.status === params.status);
   }
 
-  // 7. Sort
+  // 9. Sort
   const sortBy = params.sortBy || (params.sort as any) || "projectCode";
   const sortOrder = params.sortOrder || "asc";
 
@@ -128,7 +139,7 @@ export function getProjects(params: ProjectQueryParams = {}): ProjectListRespons
     return sortOrder === "desc" ? -cmp : cmp;
   });
 
-  // 8. Pagination
+  // 10. Pagination
   const page = Math.max(1, Number(params.page) || 1);
   const pageSize = Math.max(1, Math.min(100, Number(params.pageSize || params.limit) || 10));
   const totalCount = items.length;
@@ -138,10 +149,12 @@ export function getProjects(params: ProjectQueryParams = {}): ProjectListRespons
   const paginatedProjects = items.slice(startIndex, startIndex + pageSize);
 
   // Available filter options extracted from canonical database
+  const availableStates = repo.getDistinctStates();
   const availableDistricts = repo.getDistinctDistricts();
   const availableSectors = repo.getDistinctSectors();
   const availableStatuses = Array.from(new Set(allProjects.map((p) => p.status))).sort();
   const availableSeverities = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+  const availableSignalTypes = Array.from(new Set(items.map((it) => it.signal))).filter(Boolean).sort();
 
   return {
     projects: paginatedProjects,
@@ -155,10 +168,12 @@ export function getProjects(params: ProjectQueryParams = {}): ProjectListRespons
     page: validPage,
     pageSize,
     totalPages,
+    availableStates,
     availableDistricts,
     availableSectors,
     availableStatuses,
     availableSeverities,
+    availableSignalTypes,
   };
 }
 

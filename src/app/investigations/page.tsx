@@ -3,8 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { SeverityBadge } from "@/components/ui/SeverityBadge";
 import { Button } from "@/components/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
@@ -16,9 +15,19 @@ import {
   ArrowRight,
   Filter,
   Search,
-  AlertTriangle,
   RefreshCw,
+  Calendar,
+  FilePlus,
+  CheckCircle2,
 } from "lucide-react";
+
+function extractMpName(title: string): string {
+  const cleaned = title
+    .replace(/^MPLAD Allocation Limit\s*—\s*/i, "")
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim();
+  return cleaned || title;
+}
 
 export default function InvestigationsPage() {
   const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
@@ -26,6 +35,7 @@ export default function InvestigationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -48,6 +58,13 @@ export default function InvestigationsPage() {
     loadData();
   }, []);
 
+  const handleQuickAction = (actionName: string, projectCode: string) => {
+    setActionFeedback(`${actionName} recorded for ${projectCode}. Opening review dossier...`);
+    setTimeout(() => {
+      setActionFeedback(null);
+    }, 4000);
+  };
+
   const filteredItems = useMemo(() => {
     return investigations.filter((item) => {
       const matchesSeverity =
@@ -64,9 +81,23 @@ export default function InvestigationsPage() {
 
   return (
     <PageContainer
-      title="Audit Investigations & Field Reviews"
-      subtitle="Prioritized queue of potential anomaly signals requiring physical verification and human audit inspection"
-      badge={<Badge variant="warning">{investigations.length} Flagged Works</Badge>}
+      title="Audit Investigation Queue"
+      subtitle="Potential anomaly signals prioritized for human review."
+      badge={
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: 600,
+            padding: "4px 10px",
+            background: "#F0F7FF",
+            border: "1px solid #B3D7FF",
+            color: "#0052B3",
+            borderRadius: "4px",
+          }}
+        >
+          {investigations.length} Priority Review Items
+        </span>
+      }
       actions={
         <Button
           variant="outline"
@@ -79,9 +110,26 @@ export default function InvestigationsPage() {
         </Button>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        {/* Responsible AI Persistent Notice */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* Responsible AI Notice */}
         <ResponsibleAiBanner />
+
+        {/* Feedback Alert if action triggered */}
+        {actionFeedback && (
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "#F0FFF4",
+              border: "1px solid #A7F3D0",
+              borderRadius: "6px",
+              color: "#166534",
+              fontSize: "12px",
+              fontWeight: 500,
+            }}
+          >
+            {actionFeedback}
+          </div>
+        )}
 
         {/* Filter Controls Bar */}
         <div
@@ -101,8 +149,8 @@ export default function InvestigationsPage() {
           <div style={{ position: "relative", flex: 1, minWidth: "260px", maxWidth: "440px" }}>
             <Search
               style={{
-                width: "15px",
-                height: "15px",
+                width: "14px",
+                height: "14px",
                 color: "#6B7A8E",
                 position: "absolute",
                 left: "10px",
@@ -112,12 +160,12 @@ export default function InvestigationsPage() {
             />
             <input
               type="text"
-              placeholder="Search by code, title, constituency, district..."
+              placeholder="Search by MP, constituency, record code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
                 width: "100%",
-                paddingLeft: "34px",
+                paddingLeft: "32px",
                 paddingRight: "12px",
                 paddingTop: "7px",
                 paddingBottom: "7px",
@@ -131,8 +179,8 @@ export default function InvestigationsPage() {
             />
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Filter style={{ width: "14px", height: "14px", color: "#6B7A8E" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <Filter style={{ width: "13px", height: "13px", color: "#6B7A8E" }} />
             <span style={{ fontSize: "11px", color: "#6B7A8E", fontWeight: 600 }}>Review Priority:</span>
             <div style={{ display: "flex", gap: "4px" }}>
               {(["ALL", "CRITICAL", "HIGH", "MEDIUM"] as const).map((sev) => {
@@ -153,7 +201,7 @@ export default function InvestigationsPage() {
                       transition: "all 0.15s ease",
                     }}
                   >
-                    {sev}
+                    {sev === "ALL" ? "All Priorities" : sev}
                   </button>
                 );
               })}
@@ -166,7 +214,7 @@ export default function InvestigationsPage() {
           <div style={{ padding: "48px 0" }}>
             <LoadingState
               title="Loading Audit Investigation Queue..."
-              description="Connecting to backend REST API (GET /api/investigations) and retrieving case evidence."
+              description="Retrieving prioritized anomaly signals for human review."
             />
           </div>
         ) : error ? (
@@ -181,11 +229,11 @@ export default function InvestigationsPage() {
           <div style={{ padding: "48px 0" }}>
             <EmptyState
               icon={<FileSearch style={{ width: "32px", height: "32px", color: "#0080FF" }} />}
-              title="No Investigation Cases Found"
+              title="No Review Items Found"
               description={
                 searchQuery || severityFilter !== "ALL"
-                  ? "No cases match your filter criteria. Try broadening your search or resetting filters."
-                  : "All projects currently adhere to baseline thresholds. No immediate field verifications queued."
+                  ? "No cases match your filter criteria. Try resetting filters."
+                  : "All official allocations adhere to baseline distribution thresholds."
               }
               action={
                 searchQuery || severityFilter !== "ALL"
@@ -202,130 +250,167 @@ export default function InvestigationsPage() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {filteredItems.map((item) => (
-              <Card
-                key={item.id}
-                variant="default"
-              >
-                <CardHeader style={{ paddingBottom: "10px" }}>
-                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      <span
-                        style={{
-                          fontFamily: "JetBrains Mono, monospace",
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          background: "#F0F3F7",
-                          color: "#3D4B5C",
-                          border: "1px solid #DDE2EA",
-                        }}
-                      >
-                        {item.id}
-                      </span>
-                      <SeverityBadge severity={item.severity as any} />
-                      <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "12px", fontWeight: 700, color: "#0080FF" }}>
-                        {item.projectCode}
-                      </span>
-                      <Badge variant="info" size="sm">
-                        {item.status}
-                      </Badge>
-                      <Badge variant="outline" size="sm">
-                        {item.signalSummary || item.signalType.replace(/_/g, " ")}
-                      </Badge>
-                    </div>
+            {filteredItems.map((item) => {
+              const mpName = extractMpName(item.title);
+              const signalTitle = item.signalSummary || item.signalType.replace(/_/g, " ");
 
+              return (
+                <Card key={item.id} variant="default">
+                  <CardHeader style={{ paddingBottom: "8px" }}>
                     <div
                       style={{
-                        fontSize: "11px",
-                        color: "#B76E00",
-                        fontWeight: 600,
                         display: "flex",
+                        flexWrap: "wrap",
                         alignItems: "center",
-                        gap: "5px",
-                        background: "#FFF8E6",
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #FFE399",
+                        justifyContent: "space-between",
+                        gap: "10px",
                       }}
                     >
-                      <AlertTriangle style={{ width: "13px", height: "13px", color: "#B76E00" }} />
-                      {item.reviewPriority}
-                    </div>
-                  </div>
-
-                  <CardTitle style={{ fontSize: "14px", color: "#0F1724", marginTop: "8px" }}>
-                    {item.title}
-                  </CardTitle>
-
-                  <CardDescription style={{ fontSize: "11px", color: "#6B7A8E", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
-                    <span>Constituency: <strong style={{ color: "#3D4B5C" }}>{item.constituency}</strong></span>
-                    <span>District: <strong style={{ color: "#3D4B5C" }}>{item.district}</strong></span>
-                    <span>Sector: <strong style={{ color: "#3D4B5C" }}>{item.sector}</strong></span>
-                    <span>Assigned Reviewer: <strong style={{ color: "#0080FF" }}>{item.assignedReviewer}</strong></span>
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent style={{ paddingTop: 0 }}>
-                  <div
-                    style={{
-                      background: "#F8F9FB",
-                      padding: "10px 12px",
-                      borderRadius: "6px",
-                      border: "1px solid #DDE2EA",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <p style={{ fontSize: "12px", color: "#3D4B5C", lineHeight: 1.5, margin: 0 }}>
-                      {item.explanation}
-                    </p>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "10px",
-                      fontSize: "11px",
-                      color: "#6B7A8E",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-                      <span>
-                        Created: <strong style={{ color: "#0F1724", fontFamily: "JetBrains Mono, monospace" }}>{item.createdDate}</strong>
-                      </span>
-                      <span>
-                        Last Updated: <strong style={{ color: "#0F1724", fontFamily: "JetBrains Mono, monospace" }}>{item.lastUpdated}</strong>
-                      </span>
-                      <span>
-                        Evidence Items: <strong style={{ color: "#0F1724" }}>{item.evidenceCount}</strong>
-                      </span>
-                      <span>
-                        Signal Score:{" "}
-                        <strong style={{ color: "#DE350B", fontFamily: "JetBrains Mono, monospace" }}>
-                          {item.overallSignalScore.toFixed(3)}
-                        </strong>
-                      </span>
-                    </div>
-
-                    <div>
-                      <Link href={`/projects/${item.projectCode}`}>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          rightIcon={<ArrowRight style={{ width: "13px", height: "13px" }} />}
+                      {/* Left: Record Code + Priority + Review Status */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <span
+                          style={{
+                            fontFamily: "JetBrains Mono, monospace",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            color: "#0080FF",
+                          }}
                         >
-                          Open Investigation Dossier
-                        </Button>
-                      </Link>
+                          {item.projectCode}
+                        </span>
+
+                        <SeverityBadge severity={item.severity as any} />
+
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            padding: "2px 8px",
+                            background: "#F1F5F9",
+                            color: "#334155",
+                            borderRadius: "4px",
+                            border: "1px solid #CBD5E1",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Status: {item.status}
+                        </span>
+                      </div>
+
+                      {/* Right: Signal Type */}
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 600,
+                          color: "#1E293B",
+                          background: "#F8FAFC",
+                          border: "1px solid #E2E8F0",
+                          borderRadius: "4px",
+                          padding: "3px 8px",
+                        }}
+                      >
+                        Signal: {signalTitle}
+                      </span>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                    {/* MP / Constituency Title */}
+                    <CardTitle style={{ fontSize: "15px", color: "#0F1724", marginTop: "10px", marginBottom: "4px" }}>
+                      {mpName}
+                    </CardTitle>
+
+                    <div style={{ fontSize: "12px", color: "#6B7A8E", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                      <span>Constituency: <strong style={{ color: "#1E293B" }}>{item.constituency}</strong></span>
+                      <span>District: <strong style={{ color: "#1E293B" }}>{item.district}</strong></span>
+                      <span>Review Priority: <strong style={{ color: "#0F1724" }}>{item.reviewPriority}</strong></span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent style={{ paddingTop: "4px" }}>
+                    {/* Why it was flagged */}
+                    <div
+                      style={{
+                        background: "#F8F9FB",
+                        padding: "10px 14px",
+                        borderRadius: "6px",
+                        border: "1px solid #E2E8F0",
+                        marginBottom: "14px",
+                      }}
+                    >
+                      <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748B", marginBottom: "2px" }}>
+                        Why it was flagged:
+                      </div>
+                      <p style={{ fontSize: "12px", color: "#1E293B", lineHeight: 1.5, margin: 0 }}>
+                        {item.explanation}
+                      </p>
+                    </div>
+
+                    {/* Actions: Primary "Open Review", Secondary actions */}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "10px",
+                        paddingTop: "8px",
+                        borderTop: "1px solid #F1F5F9",
+                      }}
+                    >
+                      {/* Secondary Actions */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                        <Link href={`/projects/${item.projectCode}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<Calendar style={{ width: "12px", height: "12px" }} />}
+                            onClick={() => handleQuickAction("Inspection Schedule", item.projectCode)}
+                            style={{ fontSize: "11px" }}
+                          >
+                            Schedule Review
+                          </Button>
+                        </Link>
+
+                        <Link href={`/projects/${item.projectCode}#notes`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<FilePlus style={{ width: "12px", height: "12px" }} />}
+                            onClick={() => handleQuickAction("Evidence note prompt", item.projectCode)}
+                            style={{ fontSize: "11px" }}
+                          >
+                            Add Evidence
+                          </Button>
+                        </Link>
+
+                        <Link href={`/projects/${item.projectCode}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            leftIcon={<CheckCircle2 style={{ width: "12px", height: "12px" }} />}
+                            onClick={() => handleQuickAction("Close determination", item.projectCode)}
+                            style={{ fontSize: "11px", color: "#64748B" }}
+                          >
+                            Close Review
+                          </Button>
+                        </Link>
+                      </div>
+
+                      {/* Primary Action Button */}
+                      <div>
+                        <Link href={`/projects/${item.projectCode}`}>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            rightIcon={<ArrowRight style={{ width: "13px", height: "13px" }} />}
+                          >
+                            Open Review
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

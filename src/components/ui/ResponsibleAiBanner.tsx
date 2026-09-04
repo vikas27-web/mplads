@@ -18,7 +18,7 @@ export const ResponsibleAiBanner: React.FC<{ compact?: boolean }> = ({ compact }
           whiteSpace: "nowrap",
         }}
       >
-        Signals ≠ fraud — human verification required
+        Anomaly signal does not equal fraud. Evidence requires human verification.
       </span>
     );
   }
@@ -27,19 +27,19 @@ export const ResponsibleAiBanner: React.FC<{ compact?: boolean }> = ({ compact }
     <div
       role="note"
       style={{
-        padding: "10px 14px",
+        padding: "8px 14px",
         background: "rgba(0,128,255,0.04)",
         border: "1px solid rgba(0,128,255,0.16)",
         borderRadius: "6px",
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         gap: "10px",
       }}
     >
       <svg
         viewBox="0 0 20 20"
         fill="none"
-        style={{ width: "16px", height: "16px", color: "#0080FF", flexShrink: 0, marginTop: "1px" }}
+        style={{ width: "15px", height: "15px", color: "#0080FF", flexShrink: 0 }}
         aria-hidden="true"
       >
         <path
@@ -47,9 +47,8 @@ export const ResponsibleAiBanner: React.FC<{ compact?: boolean }> = ({ compact }
           fill="currentColor"
         />
       </svg>
-      <p style={{ fontSize: "12px", color: "#1a5fa8", margin: 0, lineHeight: 1.5 }}>
-        <strong>Responsible AI Notice:</strong> Anomaly signal does not equal fraud.
-        Physical verification &amp; human investigation required before any administrative action.
+      <p style={{ fontSize: "12px", color: "#1a5fa8", margin: 0, lineHeight: 1.4 }}>
+        <strong>Responsible AI Notice:</strong> Anomaly signal does not equal fraud. Evidence requires human verification.
       </p>
     </div>
   );

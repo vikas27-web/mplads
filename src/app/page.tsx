@@ -73,8 +73,8 @@ export default function HomePage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-            <Badge variant="info">Phase 9 Complete</Badge>
-            <Badge variant="warning">DEMO DATA</Badge>
+            <Badge variant="info">Audit Prototype</Badge>
+            <Badge variant="success">Official SIH Dataset</Badge>
           </div>
         </div>
 

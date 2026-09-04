@@ -62,9 +62,11 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
  */
 export interface ProjectQueryParams {
   search?: string;
+  state?: string;
   district?: string;
   sector?: string;
   severity?: string;
+  signalType?: string;
   status?: string;
   sort?: string;
   sortBy?: "projectCode" | "recommendedAmount" | "lastUpdated" | "severity";
@@ -111,10 +113,12 @@ export interface ProjectListResponse {
   page: number;
   pageSize: number;
   totalPages: number;
+  availableStates?: string[];
   availableDistricts: string[];
   availableSectors: string[];
   availableStatuses: string[];
   availableSeverities: string[];
+  availableSignalTypes?: string[];
 }
 
 export interface ProjectDetailResponse {

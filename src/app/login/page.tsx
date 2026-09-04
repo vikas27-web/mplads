@@ -113,14 +113,14 @@ function LoginForm() {
               fontSize: "11px",
               fontWeight: 600,
               padding: "4px 10px",
-              background: "#FFFBEB",
-              border: "1px solid #FDE68A",
-              color: "#92400E",
+              background: "#F0F7FF",
+              border: "1px solid #B3D7FF",
+              color: "#0052B3",
               borderRadius: "4px",
               letterSpacing: "0.02em",
             }}
           >
-            DEMO ENVIRONMENT — DATA SUBJECT TO VERIFICATION
+            OFFICIAL SIH DATASET • AUDIT PROTOTYPE
           </span>
         </div>
       </header>

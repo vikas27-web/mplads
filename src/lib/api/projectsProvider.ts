@@ -13,9 +13,11 @@ export async function getProjects(
 ): Promise<ApiResponse<ProjectListResponse>> {
   const queryParams: ProjectQueryParams = {
     search: params.search,
+    state: params.state,
     district: params.district,
     sector: params.sector,
     severity: params.severity,
+    signalType: params.signalType,
     status: params.status,
     sortBy: params.sortBy,
     sortOrder: params.sortOrder,
@@ -59,9 +61,11 @@ export async function getProjects(
       page: res.data.page,
       limit: res.data.pageSize,
       totalPages: res.data.totalPages,
+      availableStates: res.data.availableStates,
       availableDistricts: res.data.availableDistricts,
       availableSectors: res.data.availableSectors,
       availableStatuses: res.data.availableStatuses,
+      availableSignalTypes: res.data.availableSignalTypes,
     },
     meta: res.meta,
   };
