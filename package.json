@@ -18,6 +18,7 @@
     "anomaly:eval": "node backend/evaluation/evaluator.ts",
     "test:anomaly": "node --test backend/anomaly/__tests__/anomaly.test.ts",
     "test:api": "node --test backend/api/__tests__/api.test.ts",
+    "test:smoke": "node backend/scripts/smokeTestApi.ts",
     "api:dev": "node backend/api/server.ts",
     "api:start": "node backend/api/server.ts"
   },
