@@ -1,0 +1,165 @@
+"use client";
+
+import React from "react";
+import { usePathname } from "next/navigation";
+import { Menu, User } from "lucide-react";
+
+export interface HeaderProps {
+  onToggleMobileSidebar: () => void;
+}
+
+const routeTitles: Record<string, string> = {
+  "/": "Overview",
+  "/dashboard": "Audit Portfolio Dashboard",
+  "/projects": "Project Explorer",
+  "/analytics": "Statistical Analytics",
+  "/investigations": "Audit Investigations",
+};
+
+export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
+  const pathname = usePathname();
+
+  const getTitle = () => {
+    if (routeTitles[pathname]) return routeTitles[pathname];
+    if (pathname.startsWith("/projects/")) return "Project Investigation";
+    if (pathname.startsWith("/investigations/")) return "Investigation Dossier";
+    return "MPLAD SENTINEL";
+  };
+
+  return (
+    <header
+      style={{
+        height: "56px",
+        background: "#FFFFFF",
+        borderBottom: "1px solid #DDE2EA",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+        flexShrink: 0,
+      }}
+    >
+      {/* Left: breadcrumb */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <button
+          onClick={onToggleMobileSidebar}
+          className="md:hidden"
+          style={{
+            padding: "6px",
+            borderRadius: "6px",
+            border: "1px solid #DDE2EA",
+            background: "transparent",
+            cursor: "pointer",
+            color: "#6B7A8E",
+          }}
+          aria-label="Toggle navigation"
+        >
+          <Menu style={{ width: "16px", height: "16px" }} />
+        </button>
+
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", color: "#9BA8B5", letterSpacing: "0.02em" }}>
+            MPLAD SENTINEL
+          </span>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "#0F1724", lineHeight: 1.2 }}>
+            {getTitle()}
+          </span>
+        </div>
+      </div>
+
+      {/* Right: notices + auditor identity */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {/* Demo data notice */}
+        <span
+          className="hidden sm:inline-flex"
+          style={{
+            fontSize: "10px",
+            fontWeight: 600,
+            padding: "2px 8px",
+            background: "#FFFBEB",
+            border: "1px solid #FDE68A",
+            color: "#92400E",
+            borderRadius: "4px",
+            letterSpacing: "0.05em",
+          }}
+        >
+          DEMO DATA — NOT OFFICIAL GOVERNMENT DATA
+        </span>
+
+        {/* AI notice */}
+        <span
+          className="hidden lg:inline-flex"
+          style={{
+            fontSize: "10px",
+            padding: "2px 8px",
+            background: "rgba(0,128,255,0.06)",
+            border: "1px solid rgba(0,128,255,0.18)",
+            color: "#1a5fa8",
+            borderRadius: "4px",
+          }}
+        >
+          Signals require human verification
+        </span>
+
+        {/* System status */}
+        <span
+          className="hidden sm:inline-flex items-center gap-1.5"
+          style={{
+            fontSize: "11px",
+            padding: "2px 10px",
+            background: "#F0FFF4",
+            border: "1px solid #A7F3D0",
+            color: "#276749",
+            borderRadius: "12px",
+            fontWeight: 500,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "#276749",
+              display: "inline-block",
+            }}
+          />
+          Systems Operational
+        </span>
+
+        {/* Auditor avatar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            paddingLeft: "12px",
+            borderLeft: "1px solid #DDE2EA",
+          }}
+        >
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              background: "#F1F3F7",
+              border: "1px solid #DDE2EA",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <User style={{ width: "14px", height: "14px", color: "#6B7A8E" }} />
+          </div>
+          <div className="hidden xl:flex" style={{ flexDirection: "column" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "#0F1724" }}>SIH Auditor</span>
+            <span style={{ fontSize: "10px", color: "#9BA8B5" }}>Field Verification</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};

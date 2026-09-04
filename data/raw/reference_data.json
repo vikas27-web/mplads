@@ -1,0 +1,191 @@
+{
+  "states": [
+    {
+      "state": "Karnataka",
+      "districts": [
+        {
+          "name": "Bangalore Urban",
+          "code": "KA-BLR-U",
+          "constituencies": ["Bangalore South", "Bangalore North", "Bangalore Central"],
+          "blocks": ["Jayanagar", "BTM Layout", "Koramangala", "Yeshwantpur", "Hebbal", "Malleshwaram"]
+        },
+        {
+          "name": "Mysore",
+          "code": "KA-MYS",
+          "constituencies": ["Mysore", "Chamarajanagar"],
+          "blocks": ["Nanjangud", "Hunsur", "T. Narasipura", "K.R. Nagar"]
+        },
+        {
+          "name": "Belgaum",
+          "code": "KA-BEL",
+          "constituencies": ["Belgaum", "Chikkodi"],
+          "blocks": ["Gokak", "Athani", "Bailhongal", "Khanapur"]
+        }
+      ]
+    },
+    {
+      "state": "Maharashtra",
+      "districts": [
+        {
+          "name": "Mumbai Suburban",
+          "code": "MH-MUM-S",
+          "constituencies": ["Mumbai North", "Mumbai North West", "Mumbai North East"],
+          "blocks": ["Andheri", "Borivali", "Kurla", "Ghatkopar", "Mulund"]
+        },
+        {
+          "name": "Pune",
+          "code": "MH-PUN",
+          "constituencies": ["Pune", "Baramati", "Shirur"],
+          "blocks": ["Haveli", "Khed", "Ambegaon", "Maval", "Daund"]
+        },
+        {
+          "name": "Nagpur",
+          "code": "MH-NAG",
+          "constituencies": ["Nagpur", "Ramtek"],
+          "blocks": ["Katol", "Saoner", "Umred", "Kamptee"]
+        }
+      ]
+    },
+    {
+      "state": "Delhi",
+      "districts": [
+        {
+          "name": "New Delhi",
+          "code": "DL-NDL",
+          "constituencies": ["New Delhi"],
+          "blocks": ["Connaught Place", "Chanakyapuri", "Lodhi Colony", "Sarojini Nagar"]
+        },
+        {
+          "name": "South Delhi",
+          "code": "DL-SDL",
+          "constituencies": ["South Delhi"],
+          "blocks": ["Hauz Khas", "Saket", "Mehrauli", "Sangam Vihar"]
+        },
+        {
+          "name": "East Delhi",
+          "code": "DL-EDL",
+          "constituencies": ["East Delhi"],
+          "blocks": ["Preet Vihar", "Mayur Vihar", "Gandhi Nagar", "Patparganj"]
+        }
+      ]
+    },
+    {
+      "state": "Tamil Nadu",
+      "districts": [
+        {
+          "name": "Chennai",
+          "code": "TN-CHN",
+          "constituencies": ["Chennai South", "Chennai Central", "Chennai North"],
+          "blocks": ["Mylapore", "T. Nagar", "Anna Nagar", "Royapuram", "Adyar"]
+        },
+        {
+          "name": "Coimbatore",
+          "code": "TN-CBE",
+          "constituencies": ["Coimbatore", "Pollachi"],
+          "blocks": ["Sulur", "Mettupalayam", "Annur", "Perur"]
+        }
+      ]
+    },
+    {
+      "state": "Uttar Pradesh",
+      "districts": [
+        {
+          "name": "Lucknow",
+          "code": "UP-LKO",
+          "constituencies": ["Lucknow", "Mohanlalganj"],
+          "blocks": ["Bakshi Ka Talab", "Malihabad", "Chinhat", "Kakori"]
+        },
+        {
+          "name": "Varanasi",
+          "code": "UP-VNS",
+          "constituencies": ["Varanasi"],
+          "blocks": ["Pindra", "Arajiline", "Sevapuri", "Harahua"]
+        }
+      ]
+    }
+  ],
+  "sectors": [
+    {
+      "name": "Drinking Water Supply",
+      "categories": [
+        "Installation of High-Capacity RO Water Purification Plants",
+        "Deep Borewell & Solar Powered Pump Systems",
+        "Overhead Water Storage Tank & Piped Distribution",
+        "Community Water Filtration Kiosks"
+      ],
+      "cost_range": [1500000, 3500000]
+    },
+    {
+      "name": "Rural Roads & Pathways",
+      "categories": [
+        "Construction of All-Weather Concrete Village Roads",
+        "Asphalt Overlay & Drainage Network for Rural Link Road",
+        "Interlocking Paver Block Pathways for Habitation Connect",
+        "Causeway & Box Culvert Bridge Construction"
+      ],
+      "cost_range": [2500000, 5000000]
+    },
+    {
+      "name": "Community Infrastructure",
+      "categories": [
+        "Construction of Community Welfare Center & Library",
+        "Multi-Purpose Community Hall with Public Amenities",
+        "Senior Citizens Recreation Pavilion & Green Park",
+        "Public Crematorium Shed & Boundary Wall"
+      ],
+      "cost_range": [3000000, 5000000]
+    },
+    {
+      "name": "Education & Anganwadis",
+      "categories": [
+        "Smart Classroom Setup & Computer Lab Equipment",
+        "Construction of Additional Classrooms & Science Lab",
+        "Model Anganwadi Center with Child-Friendly Sanitation",
+        "School Library & Reading Resource Center"
+      ],
+      "cost_range": [1200000, 3000000]
+    },
+    {
+      "name": "Public Health & Sanitation",
+      "categories": [
+        "Sub-Health Center Extension & Diagnostic Unit",
+        "Community Modern Sanitation Complex (Separate Units)",
+        "Mobile Medical Unit & Healthcare Screening Equipment",
+        "Solid Waste Segregation Shed & Bio-Digester"
+      ],
+      "cost_range": [1800000, 4200000]
+    },
+    {
+      "name": "Irrigation & Flood Control",
+      "categories": [
+        "De-silting & Rejuvenation of Minor Irrigation Tank",
+        "Check Dam Construction for Ground Water Recharge",
+        "Concrete Retaining Wall for Flood Protection",
+        "Lift Irrigation Scheme for Small Farmers"
+      ],
+      "cost_range": [2000000, 4500000]
+    }
+  ],
+  "implementing_agencies": [
+    { "code": "AGY-PWD", "name": "Public Works Department (PWD)", "type": "State Engineering Dept" },
+    { "code": "AGY-RDPR", "name": "Rural Development & Panchayat Raj Dept", "type": "Rural Engineering Wing" },
+    { "code": "AGY-ZP", "name": "Zilla Panchayat Engineering Division", "type": "Local Governance Body" },
+    { "code": "AGY-BBMP", "name": "Bruhat Bengaluru Mahanagara Palike", "type": "Municipal Corporation" },
+    { "code": "AGY-DJB", "name": "Delhi Jal Board", "type": "Water & Sanitation Authority" },
+    { "code": "AGY-TWAD", "name": "Tamil Nadu Water Supply & Drainage Board", "type": "Statutory Board" },
+    { "code": "AGY-UPRN", "name": "UP Rajya Nirman Nigam", "type": "State Infrastructure PSU" },
+    { "code": "AGY-MID", "name": "Minor Irrigation & Ground Water Dept", "type": "State Engineering Dept" }
+  ],
+  "contractors": [
+    { "id": "CON-001", "name": "Venkateshwara Infrastructure Ltd", "reg": "REG-KA-CIVIL-0412" },
+    { "id": "CON-002", "name": "Apex Civil Engineering Works", "reg": "REG-MH-INFRA-8901" },
+    { "id": "CON-003", "name": "AquaPure Solutions India Pvt Ltd", "reg": "REG-DL-WATER-3321" },
+    { "id": "CON-004", "name": "Sri Durga Builders & Developers", "reg": "REG-KA-CIVIL-1109" },
+    { "id": "CON-005", "name": "Kaveri Engineering Corporation", "reg": "REG-TN-INFRA-5542" },
+    { "id": "CON-006", "name": "Shivaji Construction & Earthmovers", "reg": "REG-MH-CIVIL-7721" },
+    { "id": "CON-007", "name": "National Infrastructure & Project Corp", "reg": "REG-UP-CIVIL-9904" },
+    { "id": "CON-008", "name": "Pragati Urban Builders Pvt Ltd", "reg": "REG-DL-INFRA-4420" },
+    { "id": "CON-009", "name": "Meenakshi Water & Power Infra", "reg": "REG-TN-CIVIL-6612" },
+    { "id": "CON-010", "name": "Ganga Basin Builders & Engineers", "reg": "REG-UP-INFRA-1287" }
+  ]
+}

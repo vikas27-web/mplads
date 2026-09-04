@@ -1,0 +1,44 @@
+{
+  "name": "mplad-sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "generate:data": "node backend/scripts/generate.ts",
+    "init:db": "node backend/scripts/initDb.ts",
+    "test:data": "node --test backend/tests/dataset.test.ts",
+    "features:generate": "node backend/scripts/generateFeatures.ts",
+    "test:features": "node --test backend/tests/features.test.ts",
+    "anomaly:run": "node backend/anomaly/pipeline.ts",
+    "anomaly:pipeline": "node backend/anomaly/pipeline.ts",
+    "anomaly:eval": "node backend/evaluation/evaluator.ts",
+    "test:anomaly": "node --test backend/anomaly/__tests__/anomaly.test.ts",
+    "test:api": "node --test backend/api/__tests__/api.test.ts",
+    "api:dev": "node backend/api/server.ts",
+    "api:start": "node backend/api/server.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.454.0",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.0",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.15",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
+  }
+}
