@@ -12,8 +12,9 @@ const routeTitles: Record<string, string> = {
   "/": "Overview",
   "/dashboard": "Audit Portfolio Dashboard",
   "/projects": "Project Explorer",
-  "/analytics": "Statistical Analytics",
-  "/investigations": "Audit Investigations",
+  "/signals": "Priority Audit Signals",
+  "/investigations": "Audit Investigation Queue",
+  "/analytics": "Regional & Statistical Analytics",
 };
 
 export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {

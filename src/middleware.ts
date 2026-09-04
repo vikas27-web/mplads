@@ -11,6 +11,7 @@ import {
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/projects",
+  "/signals",
   "/analytics",
   "/investigations",
   "/dev",

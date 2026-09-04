@@ -8,6 +8,7 @@ import {
   FolderSearch,
   BarChart3,
   FileSearch,
+  AlertTriangle,
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
@@ -20,10 +21,11 @@ export interface SidebarProps {
 }
 
 const navItems = [
-  { label: "Dashboard",        path: "/dashboard",      icon: LayoutDashboard },
-  { label: "Project Explorer", path: "/projects",        icon: FolderSearch },
-  { label: "Analytics",        path: "/analytics",       icon: BarChart3 },
-  { label: "Investigations",   path: "/investigations",  icon: FileSearch },
+  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { label: "Project Explorer", path: "/projects", icon: FolderSearch },
+  { label: "Audit Signals", path: "/signals", icon: AlertTriangle },
+  { label: "Investigation Queue", path: "/investigations", icon: FileSearch },
+  { label: "Regional Analytics", path: "/analytics", icon: BarChart3 },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse, className }) => {

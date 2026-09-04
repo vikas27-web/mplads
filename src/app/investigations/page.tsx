@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
 import { ResponsibleAiBanner } from "@/components/ui/ResponsibleAiBanner";
 import { getInvestigations } from "@/lib/api-client";
+import { getDashboardData } from "@/lib/api/dashboardProvider";
 import type { InvestigationItem } from "../../../backend/api/types.ts";
+import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTable";
+import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
+import { PriorityProject } from "@/types/dashboard";
 import {
   FileSearch,
   ArrowRight,
@@ -19,6 +23,9 @@ import {
   Calendar,
   FilePlus,
   CheckCircle2,
+  ListFilter,
+  Table as TableIcon,
+  History,
 } from "lucide-react";
 
 function extractMpName(title: string): string {
@@ -31,6 +38,8 @@ function extractMpName(title: string): string {
 
 export default function InvestigationsPage() {
   const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
+  const [priorityProjects, setPriorityProjects] = useState<PriorityProject[]>([]);
+  const [activeTab, setActiveTab] = useState<"queue" | "table" | "activity">("queue");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState("ALL");
@@ -41,11 +50,19 @@ export default function InvestigationsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await getInvestigations();
-      if (res.success && res.data) {
-        setInvestigations(res.data.investigations);
+      const [invRes, dashRes] = await Promise.all([
+        getInvestigations(),
+        getDashboardData(),
+      ]);
+
+      if (invRes.success && invRes.data) {
+        setInvestigations(invRes.data.investigations);
       } else {
-        setError(res.error?.message || "Failed to retrieve investigation cases.");
+        setError(invRes.error?.message || "Failed to retrieve investigation cases.");
+      }
+
+      if (dashRes.success && dashRes.data) {
+        setPriorityProjects(dashRes.data.priorityProjects || []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected network error occurred.");
@@ -78,6 +95,18 @@ export default function InvestigationsPage() {
       return matchesSeverity && matchesSearch;
     });
   }, [investigations, severityFilter, searchQuery]);
+
+  const filteredTableProjects = useMemo(() => {
+    return priorityProjects.filter((p) => {
+      const matchesSeverity =
+        severityFilter === "ALL" || p.severity === severityFilter;
+      const matchesSearch =
+        searchQuery === "" ||
+        p.projectCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.constituency.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSeverity && matchesSearch;
+    });
+  }, [priorityProjects, severityFilter, searchQuery]);
 
   return (
     <PageContainer
@@ -131,287 +160,369 @@ export default function InvestigationsPage() {
           </div>
         )}
 
-        {/* Filter Controls Bar */}
+        {/* Workspace View Tabs */}
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: "12px",
-            justifyContent: "space-between",
             alignItems: "center",
-            background: "#FFFFFF",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            border: "1px solid #DDE2EA",
+            gap: "8px",
+            borderBottom: "1px solid #DDE2EA",
+            paddingBottom: "10px",
           }}
         >
-          <div style={{ position: "relative", flex: 1, minWidth: "260px", maxWidth: "440px" }}>
-            <Search
-              style={{
-                width: "14px",
-                height: "14px",
-                color: "#6B7A8E",
-                position: "absolute",
-                left: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search by MP, constituency, record code..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                paddingLeft: "32px",
-                paddingRight: "12px",
-                paddingTop: "7px",
-                paddingBottom: "7px",
-                background: "#F8F9FB",
-                border: "1px solid #DDE2EA",
-                borderRadius: "6px",
-                fontSize: "12px",
-                color: "#0F1724",
-                outline: "none",
-              }}
-            />
-          </div>
+          <button
+            onClick={() => setActiveTab("queue")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderRadius: "6px",
+              border: activeTab === "queue" ? "1px solid #0080FF" : "1px solid #DDE2EA",
+              background: activeTab === "queue" ? "#0080FF" : "#FFFFFF",
+              color: activeTab === "queue" ? "#FFFFFF" : "#4A5568",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <ListFilter style={{ width: "13px", height: "13px" }} />
+            Active Review Cards ({investigations.length})
+          </button>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <Filter style={{ width: "13px", height: "13px", color: "#6B7A8E" }} />
-            <span style={{ fontSize: "11px", color: "#6B7A8E", fontWeight: 600 }}>Review Priority:</span>
-            <div style={{ display: "flex", gap: "4px" }}>
-              {(["ALL", "CRITICAL", "HIGH", "MEDIUM"] as const).map((sev) => {
-                const isSelected = severityFilter === sev;
-                return (
-                  <button
-                    key={sev}
-                    onClick={() => setSeverityFilter(sev)}
-                    style={{
-                      padding: "4px 10px",
-                      fontSize: "11px",
-                      borderRadius: "4px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      border: isSelected ? "1px solid #0080FF" : "1px solid #DDE2EA",
-                      background: isSelected ? "#0080FF" : "#FFFFFF",
-                      color: isSelected ? "#FFFFFF" : "#4A5568",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    {sev === "ALL" ? "All Priorities" : sev}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveTab("table")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderRadius: "6px",
+              border: activeTab === "table" ? "1px solid #0080FF" : "1px solid #DDE2EA",
+              background: activeTab === "table" ? "#0080FF" : "#FFFFFF",
+              color: activeTab === "table" ? "#FFFFFF" : "#4A5568",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <TableIcon style={{ width: "13px", height: "13px" }} />
+            Inspection Queue Table ({priorityProjects.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("activity")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderRadius: "6px",
+              border: activeTab === "activity" ? "1px solid #0080FF" : "1px solid #DDE2EA",
+              background: activeTab === "activity" ? "#0080FF" : "#FFFFFF",
+              color: activeTab === "activity" ? "#FFFFFF" : "#4A5568",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <History style={{ width: "13px", height: "13px" }} />
+            Recent Audit Trail
+          </button>
         </div>
 
-        {/* Main Content States */}
-        {isLoading ? (
-          <div style={{ padding: "48px 0" }}>
-            <LoadingState
-              title="Loading Audit Investigation Queue..."
-              description="Retrieving prioritized anomaly signals for human review."
-            />
-          </div>
-        ) : error ? (
-          <div style={{ padding: "48px 0" }}>
-            <ErrorState
-              title="Failed to Load Investigation Queue"
-              description={error}
-              onRetry={loadData}
-            />
-          </div>
-        ) : filteredItems.length === 0 ? (
-          <div style={{ padding: "48px 0" }}>
-            <EmptyState
-              icon={<FileSearch style={{ width: "32px", height: "32px", color: "#0080FF" }} />}
-              title="No Review Items Found"
-              description={
-                searchQuery || severityFilter !== "ALL"
-                  ? "No cases match your filter criteria. Try resetting filters."
-                  : "All official allocations adhere to baseline distribution thresholds."
-              }
-              action={
-                searchQuery || severityFilter !== "ALL"
-                  ? {
-                      label: "Reset Filters",
-                      onClick: () => {
-                        setSearchQuery("");
-                        setSeverityFilter("ALL");
-                      },
-                    }
-                  : undefined
-              }
-            />
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {filteredItems.map((item) => {
-              const mpName = extractMpName(item.title);
-              const signalTitle = item.signalSummary || item.signalType.replace(/_/g, " ");
+        {/* Tab 2: Inspection Table */}
+        {activeTab === "table" && (
+          <PriorityProjectsTable projects={filteredTableProjects} />
+        )}
 
-              return (
-                <Card key={item.id} variant="default">
-                  <CardHeader style={{ paddingBottom: "8px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "10px",
-                      }}
-                    >
-                      {/* Left: Record Code + Priority + Review Status */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                        <span
-                          style={{
-                            fontFamily: "JetBrains Mono, monospace",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: "#0080FF",
-                          }}
-                        >
-                          {item.projectCode}
-                        </span>
+        {/* Tab 3: Recent Activity */}
+        {activeTab === "activity" && (
+          <RecentInvestigationsSection investigations={investigations} />
+        )}
 
-                        <SeverityBadge severity={item.severity as any} />
+        {/* Tab 1: Active Review Queue Cards */}
+        {activeTab === "queue" && (
+          <>
+            {/* Filter Controls Bar */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: "12px",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "#FFFFFF",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                border: "1px solid #DDE2EA",
+              }}
+            >
+              <div style={{ position: "relative", flex: 1, minWidth: "260px", maxWidth: "440px" }}>
+                <Search
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    color: "#6B7A8E",
+                    position: "absolute",
+                    left: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search by MP, constituency, record code..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    paddingLeft: "32px",
+                    paddingRight: "12px",
+                    paddingTop: "7px",
+                    paddingBottom: "7px",
+                    background: "#F8F9FB",
+                    border: "1px solid #DDE2EA",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    color: "#0F1724",
+                    outline: "none",
+                  }}
+                />
+              </div>
 
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            padding: "2px 8px",
-                            background: "#F1F5F9",
-                            color: "#334155",
-                            borderRadius: "4px",
-                            border: "1px solid #CBD5E1",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Status: {item.status}
-                        </span>
-                      </div>
-
-                      {/* Right: Signal Type */}
-                      <span
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <Filter style={{ width: "13px", height: "13px", color: "#6B7A8E" }} />
+                <span style={{ fontSize: "11px", color: "#6B7A8E", fontWeight: 600 }}>Review Priority:</span>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {(["ALL", "CRITICAL", "HIGH", "MEDIUM"] as const).map((sev) => {
+                    const isSelected = severityFilter === sev;
+                    return (
+                      <button
+                        key={sev}
+                        onClick={() => setSeverityFilter(sev)}
                         style={{
+                          padding: "4px 10px",
                           fontSize: "11px",
-                          fontWeight: 600,
-                          color: "#1E293B",
-                          background: "#F8FAFC",
-                          border: "1px solid #E2E8F0",
                           borderRadius: "4px",
-                          padding: "3px 8px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          border: isSelected ? "1px solid #0080FF" : "1px solid #DDE2EA",
+                          background: isSelected ? "#0080FF" : "#FFFFFF",
+                          color: isSelected ? "#FFFFFF" : "#4A5568",
+                          transition: "all 0.15s ease",
                         }}
                       >
-                        Signal: {signalTitle}
-                      </span>
-                    </div>
+                        {sev === "ALL" ? "All" : sev}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
 
-                    {/* MP / Constituency Title */}
-                    <CardTitle style={{ fontSize: "15px", color: "#0F1724", marginTop: "10px", marginBottom: "4px" }}>
-                      {mpName}
-                    </CardTitle>
+            {/* Main Content States */}
+            {isLoading ? (
+              <div style={{ padding: "48px 0" }}>
+                <LoadingState
+                  title="Loading Audit Investigation Queue..."
+                  description="Retrieving prioritized anomaly signals for human review."
+                />
+              </div>
+            ) : error ? (
+              <div style={{ padding: "48px 0" }}>
+                <ErrorState
+                  title="Failed to Load Investigation Queue"
+                  description={error}
+                  onRetry={loadData}
+                />
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div style={{ padding: "48px 0" }}>
+                <EmptyState
+                  icon={<FileSearch style={{ width: "32px", height: "32px", color: "#0080FF" }} />}
+                  title="No Review Items Found"
+                  description={
+                    searchQuery || severityFilter !== "ALL"
+                      ? "No cases match your filter criteria. Try resetting filters."
+                      : "All official allocations adhere to baseline distribution thresholds."
+                  }
+                  action={
+                    searchQuery || severityFilter !== "ALL"
+                      ? {
+                          label: "Reset Filters",
+                          onClick: () => {
+                            setSearchQuery("");
+                            setSeverityFilter("ALL");
+                          },
+                        }
+                      : undefined
+                  }
+                />
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {filteredItems.map((item) => {
+                  const mpName = extractMpName(item.title);
+                  const signalTitle = item.signalSummary || item.signalType.replace(/_/g, " ");
 
-                    <div style={{ fontSize: "12px", color: "#6B7A8E", display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                      <span>Constituency: <strong style={{ color: "#1E293B" }}>{item.constituency}</strong></span>
-                      <span>District: <strong style={{ color: "#1E293B" }}>{item.district}</strong></span>
-                      <span>Review Priority: <strong style={{ color: "#0F1724" }}>{item.reviewPriority}</strong></span>
-                    </div>
-                  </CardHeader>
+                  return (
+                    <Card key={item.id} variant="default">
+                      <CardHeader style={{ paddingBottom: "8px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                            <span
+                              style={{
+                                fontFamily: "JetBrains Mono, monospace",
+                                fontSize: "12px",
+                                fontWeight: 700,
+                                color: "#0080FF",
+                              }}
+                            >
+                              {item.projectCode}
+                            </span>
 
-                  <CardContent style={{ paddingTop: "4px" }}>
-                    {/* Why it was flagged */}
-                    <div
-                      style={{
-                        background: "#F8F9FB",
-                        padding: "10px 14px",
-                        borderRadius: "6px",
-                        border: "1px solid #E2E8F0",
-                        marginBottom: "14px",
-                      }}
-                    >
-                      <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748B", marginBottom: "2px" }}>
-                        Why it was flagged:
-                      </div>
-                      <p style={{ fontSize: "12px", color: "#1E293B", lineHeight: 1.5, margin: 0 }}>
-                        {item.explanation}
-                      </p>
-                    </div>
+                            <SeverityBadge severity={item.severity as any} />
 
-                    {/* Actions: Primary "Open Review", Secondary actions */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "10px",
-                        paddingTop: "8px",
-                        borderTop: "1px solid #F1F5F9",
-                      }}
-                    >
-                      {/* Secondary Actions */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                        <Link href={`/projects/${item.projectCode}`}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<Calendar style={{ width: "12px", height: "12px" }} />}
-                            onClick={() => handleQuickAction("Inspection Schedule", item.projectCode)}
-                            style={{ fontSize: "11px" }}
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                padding: "2px 8px",
+                                background: "#F1F5F9",
+                                color: "#334155",
+                                borderRadius: "4px",
+                                border: "1px solid #CBD5E1",
+                                fontWeight: 500,
+                              }}
+                            >
+                              Status: {item.status}
+                            </span>
+                          </div>
+
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              color: "#1E293B",
+                              background: "#F8FAFC",
+                              border: "1px solid #E2E8F0",
+                              borderRadius: "4px",
+                              padding: "3px 8px",
+                            }}
                           >
-                            Schedule Review
-                          </Button>
-                        </Link>
+                            Signal: {signalTitle}
+                          </span>
+                        </div>
 
-                        <Link href={`/projects/${item.projectCode}#notes`}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<FilePlus style={{ width: "12px", height: "12px" }} />}
-                            onClick={() => handleQuickAction("Evidence note prompt", item.projectCode)}
-                            style={{ fontSize: "11px" }}
-                          >
-                            Add Evidence
-                          </Button>
-                        </Link>
+                        <CardTitle style={{ fontSize: "15px", color: "#0F1724", marginTop: "10px", marginBottom: "4px" }}>
+                          {mpName}
+                        </CardTitle>
 
-                        <Link href={`/projects/${item.projectCode}`}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            leftIcon={<CheckCircle2 style={{ width: "12px", height: "12px" }} />}
-                            onClick={() => handleQuickAction("Close determination", item.projectCode)}
-                            style={{ fontSize: "11px", color: "#64748B" }}
-                          >
-                            Close Review
-                          </Button>
-                        </Link>
-                      </div>
+                        <div style={{ fontSize: "12px", color: "#6B7A8E", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                          <span>Constituency: <strong style={{ color: "#1E293B" }}>{item.constituency}</strong></span>
+                          <span>District: <strong style={{ color: "#1E293B" }}>{item.district}</strong></span>
+                          <span>Review Priority: <strong style={{ color: "#0F1724" }}>{item.reviewPriority}</strong></span>
+                        </div>
+                      </CardHeader>
 
-                      {/* Primary Action Button */}
-                      <div>
-                        <Link href={`/projects/${item.projectCode}`}>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            rightIcon={<ArrowRight style={{ width: "13px", height: "13px" }} />}
-                          >
-                            Open Review
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                      <CardContent style={{ paddingTop: "4px" }}>
+                        <div
+                          style={{
+                            background: "#F8F9FB",
+                            padding: "10px 14px",
+                            borderRadius: "6px",
+                            border: "1px solid #E2E8F0",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748B", marginBottom: "2px" }}>
+                            Why it was flagged:
+                          </div>
+                          <p style={{ fontSize: "12px", color: "#1E293B", lineHeight: 1.5, margin: 0 }}>
+                            {item.explanation}
+                          </p>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "10px",
+                            paddingTop: "8px",
+                            borderTop: "1px solid #F1F5F9",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                            <Link href={`/projects/${item.projectCode}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<Calendar style={{ width: "12px", height: "12px" }} />}
+                                onClick={() => handleQuickAction("Inspection Schedule", item.projectCode)}
+                                style={{ fontSize: "11px" }}
+                              >
+                                Schedule Review
+                              </Button>
+                            </Link>
+
+                            <Link href={`/projects/${item.projectCode}#notes`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<FilePlus style={{ width: "12px", height: "12px" }} />}
+                                onClick={() => handleQuickAction("Evidence note prompt", item.projectCode)}
+                                style={{ fontSize: "11px" }}
+                              >
+                                Add Evidence
+                              </Button>
+                            </Link>
+
+                            <Link href={`/projects/${item.projectCode}`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                leftIcon={<CheckCircle2 style={{ width: "12px", height: "12px" }} />}
+                                onClick={() => handleQuickAction("Close determination", item.projectCode)}
+                                style={{ fontSize: "11px", color: "#64748B" }}
+                              >
+                                Close Review
+                              </Button>
+                            </Link>
+                          </div>
+
+                          <div>
+                            <Link href={`/projects/${item.projectCode}`}>
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                rightIcon={<ArrowRight style={{ width: "13px", height: "13px" }} />}
+                              >
+                                Open Review
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </PageContainer>

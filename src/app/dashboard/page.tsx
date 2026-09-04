@@ -1,53 +1,41 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { DashboardData } from "@/types/dashboard";
 import { getDashboardData } from "@/lib/api/dashboardProvider";
-import { getInvestigations } from "@/lib/api-client";
-import type { InvestigationItem } from "../../../backend/api/types.ts";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/States";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardKpiGrid } from "@/components/dashboard/DashboardKpiGrid";
 import { RiskDistributionChart } from "@/components/dashboard/RiskDistributionChart";
 import { AnomalyDistributionChart } from "@/components/dashboard/AnomalyDistributionChart";
-import { DistrictRiskSection } from "@/components/dashboard/DistrictRiskSection";
-import { SectorRiskSection } from "@/components/dashboard/SectorRiskSection";
-import { AgencyConcentrationSection } from "@/components/dashboard/AgencyConcentrationSection";
-import { PrioritySignalsPanel } from "@/components/dashboard/PrioritySignalsPanel";
-import { PriorityProjectsTable } from "@/components/dashboard/PriorityProjectsTable";
-import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
-import { RecentInvestigationsSection } from "@/components/dashboard/RecentInvestigationsSection";
-import { DataQualitySection } from "@/components/dashboard/DataQualitySection";
 import { DataProvenanceCard } from "@/components/ui/DataProvenanceCard";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import {
+  AlertTriangle,
+  ClipboardList,
+  FolderSearch,
+  BarChart3,
+  ArrowRight,
+  ShieldCheck,
+  Compass,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Presentational filter state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSeverity, setSelectedSeverity] = useState("ALL");
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       setError(null);
       try {
-        const [dashRes, invRes] = await Promise.all([
-          getDashboardData(),
-          getInvestigations(),
-        ]);
-
+        const dashRes = await getDashboardData();
         if (dashRes.success && dashRes.data) {
           setData(dashRes.data);
         } else {
           setError(dashRes.error?.message || "Failed to load dashboard data.");
-        }
-
-        if (invRes.success && invRes.data) {
-          setInvestigations(invRes.data.investigations);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unexpected error occurred.");
@@ -58,26 +46,13 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
-  // Filter priority projects without calculating business metrics
-  const filteredProjects = useMemo(() => {
-    if (!data) return [];
-    return data.priorityProjects.filter((p) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        p.projectCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.constituency.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesSeverity =
-        selectedSeverity === "ALL" || p.severity === selectedSeverity;
-
-      return matchesSearch && matchesSeverity;
-    });
-  }, [data, searchQuery, selectedSeverity]);
-
   if (isLoading) {
     return (
       <div className="py-12">
-        <LoadingState title="Loading MPLAD Portfolio Intelligence..." description="Retrieving monitored project records and anomaly signals." />
+        <LoadingState
+          title="Loading MPLAD Portfolio Intelligence..."
+          description="Retrieving monitored project records and anomaly signals."
+        />
       </div>
     );
   }
@@ -85,7 +60,11 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="py-12">
-        <ErrorState title="Dashboard Connection Issue" description={error} onRetry={() => window.location.reload()} />
+        <ErrorState
+          title="Dashboard Connection Issue"
+          description={error}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     );
   }
@@ -93,13 +72,59 @@ export default function DashboardPage() {
   if (!data) {
     return (
       <div className="py-12">
-        <EmptyState title="No Portfolio Data Available" description="No scheme monitoring feeds were found." />
+        <EmptyState
+          title="No Portfolio Data Available"
+          description="No scheme monitoring feeds were found."
+        />
       </div>
     );
   }
 
+  const workspacePortals = [
+    {
+      title: "Priority Audit Signals",
+      subtitle: `${data.prioritySignals.length} Critical & High anomalies flagged for inspection`,
+      href: "/signals",
+      icon: <AlertTriangle style={{ width: "18px", height: "18px", color: "#C0392B" }} />,
+      tag: `${data.prioritySignals.length} Signals`,
+      accent: "#FEF2F2",
+      badgeColor: "#991B1B",
+      actionText: "Open Signals View",
+    },
+    {
+      title: "Audit Investigation Queue",
+      subtitle: `${data.kpis.totalAnomalies} Priority review cases with human-in-the-loop workflow`,
+      href: "/investigations",
+      icon: <ClipboardList style={{ width: "18px", height: "18px", color: "#0080FF" }} />,
+      tag: `${data.kpis.totalAnomalies} Queued Cases`,
+      accent: "#EBF5FF",
+      badgeColor: "#0052B3",
+      actionText: "Open Investigation Queue",
+    },
+    {
+      title: "Parliamentary Allocation Explorer",
+      subtitle: "Catalog of 543 Lok Sabha MPs with allocation limits across 36 States/UTs",
+      href: "/projects",
+      icon: <FolderSearch style={{ width: "18px", height: "18px", color: "#276749" }} />,
+      tag: "543 MP Records",
+      accent: "#F0FFF4",
+      badgeColor: "#166534",
+      actionText: "Explore 543 MPs",
+    },
+    {
+      title: "Regional & Sector Analytics",
+      subtitle: "Geographic distribution, sector anomaly rates, and agency concentrations",
+      href: "/analytics",
+      icon: <BarChart3 style={{ width: "18px", height: "18px", color: "#6366F1" }} />,
+      tag: "36 States / UTs",
+      accent: "#EEF2FF",
+      badgeColor: "#4338CA",
+      actionText: "View Regional Analytics",
+    },
+  ];
+
   return (
-    <div className="space-y-8">
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* 1. Header Section */}
       <DashboardHeader
         isDemoData={data.isDemoData}
@@ -110,45 +135,148 @@ export default function DashboardPage() {
       {/* 2. Official Dataset Provenance */}
       <DataProvenanceCard />
 
-      {/* 3. Official Dataset Quality Audit Section */}
-      <DataQualitySection dataQuality={data.dataQuality} />
-
-      {/* 4. KPI Overview */}
+      {/* 3. Primary Official KPIs */}
       <DashboardKpiGrid kpis={data.kpis} />
 
-      {/* 3. Filter Controls */}
-      <DashboardFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedSeverity={selectedSeverity}
-        onSeverityChange={setSelectedSeverity}
-        onReset={() => {
-          setSearchQuery("");
-          setSelectedSeverity("ALL");
+      {/* 4. Portfolio Risk Distribution Charts */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "20px",
         }}
-      />
-
-      {/* 4. Charts Section (Risk Distribution + Anomaly Categories) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      >
         <RiskDistributionChart data={data.riskDistribution} />
         <AnomalyDistributionChart data={data.anomalyDistribution} />
       </div>
 
-      {/* 5. Recent Investigation & Audit Activity */}
-      <RecentInvestigationsSection investigations={investigations} />
+      {/* 5. Clean Institutional Workspace Gateway (Replaces clumsy stacked lists) */}
+      <Card variant="default">
+        <CardHeader style={{ paddingBottom: "12px", borderBottom: "1px solid #EDF1F6" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  padding: "5px",
+                  borderRadius: "5px",
+                  background: "#EBF5FF",
+                  color: "#0080FF",
+                  display: "flex",
+                }}
+              >
+                <Compass style={{ width: "16px", height: "16px" }} />
+              </div>
+              <div>
+                <CardTitle style={{ fontSize: "14px", fontWeight: 700, color: "#0F1724" }}>
+                  Institutional Audit Workspaces
+                </CardTitle>
+                <p style={{ fontSize: "11px", color: "#64748B", margin: "2px 0 0" }}>
+                  Access dedicated auditor views via the left navigation or quick links below
+                </p>
+              </div>
+            </div>
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                padding: "2px 8px",
+                borderRadius: "4px",
+                background: "#F1F5F9",
+                color: "#475569",
+              }}
+            >
+              Auditor Workspaces
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent style={{ padding: "18px 20px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            {workspacePortals.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: "16px",
+                  borderRadius: "8px",
+                  background: "#FFFFFF",
+                  border: "1px solid #DDE2EA",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  transition: "border-color 0.15s ease",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "6px",
+                        background: item.accent,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {item.icon}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        background: item.accent,
+                        color: item.badgeColor,
+                      }}
+                    >
+                      {item.tag}
+                    </span>
+                  </div>
+                  <h4 style={{ fontSize: "14px", fontWeight: 700, color: "#0F1724", margin: 0 }}>
+                    {item.title}
+                  </h4>
+                  <p style={{ fontSize: "11px", color: "#64748B", margin: "4px 0 0", lineHeight: 1.4 }}>
+                    {item.subtitle}
+                  </p>
+                </div>
 
-      {/* 6. Priority Review Signals Panel */}
-      <PrioritySignalsPanel signals={data.prioritySignals} />
-
-      {/* 7. Signals Grid (District, Sector, Agency) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <DistrictRiskSection signals={data.districtSignals} />
-        <SectorRiskSection sectors={data.sectorSignals} />
-        <AgencyConcentrationSection agencies={data.agencySignals} />
-      </div>
-
-      {/* 8. Priority Projects Table */}
-      <PriorityProjectsTable projects={filteredProjects} />
+                <Link
+                  href={item.href}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "#0080FF",
+                    textDecoration: "none",
+                    paddingTop: "6px",
+                    borderTop: "1px solid #F1F5F9",
+                  }}
+                >
+                  {item.actionText}
+                  <ArrowRight style={{ width: "13px", height: "13px" }} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
