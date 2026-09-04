@@ -40,8 +40,9 @@ export class DatabaseManager {
           fs.mkdirSync(targetDir, { recursive: true });
         }
         fs.copyFileSync(defaultSeedPath, resolvedPath);
-      } catch {
-        // Fall back to resolved path
+      } catch (err) {
+        console.warn(`[DatabaseManager] Persistent path ${resolvedPath} not writable, falling back to bundled seed:`, err);
+        resolvedPath = defaultSeedPath;
       }
     }
 
@@ -51,11 +52,26 @@ export class DatabaseManager {
     if (resolvedPath !== ":memory:") {
       const dir = path.dirname(resolvedPath);
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+        try {
+          fs.mkdirSync(dir, { recursive: true });
+        } catch {
+          // ignore if directory already exists or read-only
+        }
       }
     }
 
-    this.db = new DatabaseSync(resolvedPath);
+    try {
+      this.db = new DatabaseSync(resolvedPath);
+    } catch (err) {
+      if (resolvedPath !== defaultSeedPath && fs.existsSync(defaultSeedPath)) {
+        console.warn(`[DatabaseManager] Could not open ${resolvedPath}, falling back to ${defaultSeedPath}`);
+        this.dbPath = defaultSeedPath;
+        this.db = new DatabaseSync(defaultSeedPath);
+      } else {
+        throw err;
+      }
+    }
+
     this.db.exec("PRAGMA foreign_keys = ON;");
     this.ensureAuditorTables();
   }

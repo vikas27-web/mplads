@@ -36,7 +36,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/backend ./backend
 COPY --from=builder /app/data ./data
 
-# Ensure data directory has write permissions for auditor reviews & notes
+# Ensure data and mount directory have write permissions for auditor reviews & notes
+RUN mkdir -p /var/data && chown -R nextjs:nodejs /var/data
 RUN chown -R nextjs:nodejs /app/data
 
 USER nextjs
